@@ -4,11 +4,20 @@ import DvdLogo from './FoodIcon';
 
 const ServingCustomerPage = () => {
   // Assuming you have the customer number stored in a variable
-  const customerNumber = 42;
   const [currentTicket, setCurrentTicket] = useState(null);
   useEffect(() => {
+    // Initial fetch of the next ticket
     fetchNextTicket();
+
+    // Set up interval to fetch new ticket every 1 second
+    const interval = setInterval(fetchNextTicket, 1000);
+
+    // Clean up interval on unmount
+    return () => {
+      clearInterval(interval);
+    };
   }, []);
+
 
   useEffect(() => {
     const handleKeyPress = (event) => {
@@ -26,8 +35,8 @@ const ServingCustomerPage = () => {
           })
             .then((response) => response.json())
             .then(() => {
-                fetchNextTicket(); // Fetch the next ticket after updating the current one
-                setCurrentTicket(updatedTicket);
+              fetchNextTicket(); // Fetch the next ticket after updating the current one
+              setCurrentTicket(updatedTicket);
             })
             .catch((error) => console.error('Error updating ticket:', error));
         }
@@ -42,7 +51,7 @@ const ServingCustomerPage = () => {
   }, [currentTicket]);
 
   const fetchNextTicket = () => {
-    fetch('http://localhost:3000/next')
+    fetch('http://localhost:3000/tickets/nextInLine')
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
@@ -53,21 +62,15 @@ const ServingCustomerPage = () => {
 
   return (
     <div>
-        <DvdLogo />
-    <div style={styles.container}>
-        {
-    console.log("T123")}
-      
-      <h2 style={styles.servingText}>Serving Customer Number</h2>
-      <h1 style={styles.customerNumber}>{(currentTicket != null && currentTicket.positionInLine) ? currentTicket.positionInLine : 999}</h1>
-      {currentTicket && (
-          <p style={styles.positionInLine}>Position in Line: {currentTicket.positionInLine}</p>
+      <DvdLogo />
+      <div style={styles.container}>
+        {console.log("Serving Customers!")}
+        <h2 style={styles.servingText}>Serving Customer Number</h2>
+        <h1 style={styles.customerNumber}>{(currentTicket != null && currentTicket.positionInLine !=null) ? currentTicket.positionInLine : "☺️"}</h1>
+        {currentTicket && currentTicket.firstName != null && (
+          <h2 style={styles.positionInLine}>You are up: {currentTicket.firstName}</h2>
         )}
-        {currentTicket && (
-          <p style={styles.positionInLine}>Name: {currentTicket.firstName}</p>
-        )}
-
-    </div>
+      </div>
     </div>
   );
 };

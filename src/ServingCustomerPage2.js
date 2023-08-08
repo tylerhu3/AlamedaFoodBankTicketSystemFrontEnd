@@ -9,7 +9,7 @@ const ServingCustomerPage = () => {
 
   useEffect(() => {
     // Fetch tickets data from the backend
-    fetch('http://localhost:3000/next')
+    fetch('http://localhost:3000/nextInLine')
       .then((response) => response.json())
       .then((data) => {
         console.log(data); // Log the fetched data
@@ -19,7 +19,7 @@ const ServingCustomerPage = () => {
   }, []);
 
   return (
-    <div>
+    <div style={styles.container2}>
         <DvdLogo />
     <div style={styles.container}>
         {
@@ -33,6 +33,9 @@ const ServingCustomerPage = () => {
 };
 
 const styles = {
+  container2:{
+    overflow:'hidden'
+  },
   container: {
     display: 'flex',
     flexDirection: 'column',

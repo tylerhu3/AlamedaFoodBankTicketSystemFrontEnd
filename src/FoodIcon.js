@@ -45,18 +45,20 @@ const DvdLogo = () => {
   return (
     <div ref={dvdRef} style={styles.dvdLogo}>
       {/* Use the IoCoffeeOutline icon from react-icons/io5 */}
-      <FaPizzaSlice size={80} style={styles.icon} />
+      <FaCoffee size={80} style={styles.icon} />
     </div>
   );
 };
 
 const styles = {
     dvdLogo: {
+        padding:'20px',
         position: 'absolute',
         width: '80px',
+        background: 'pink',
         height: '80px',
         // background: 'red', // Placeholder background color
-        // borderRadius: '4px',
+        borderRadius: '65px',
       },
   icon: {
     color: 'white', // Color for the coffee icon
