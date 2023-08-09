@@ -20,10 +20,10 @@ const DvdLogo = () => {
       y += yVelocity;
 
       // Check if the logo has hit the screen boundaries and reverse the velocity if necessary
-      if (x + logoPosition.width >= window.innerWidth || x <= 0) {
+      if (x + logoPosition.width >= window.innerWidth - 3 || x <= 0) {
         xVelocity = -xVelocity;
       }
-      if (y + logoPosition.height >= window.innerHeight || y <= 0) {
+      if (y + logoPosition.height >= window.innerHeight - 3 || y <= 0) {
         yVelocity = -yVelocity;
       }
 
@@ -45,7 +45,8 @@ const DvdLogo = () => {
   return (
     <div ref={dvdRef} style={styles.dvdLogo}>
       {/* Use the IoCoffeeOutline icon from react-icons/io5 */}
-      <FaCoffee size={80} style={styles.icon} />
+      <FaHamburger size={80} style={styles.icon} />
+    
     </div>
   );
 };

@@ -77,6 +77,7 @@ const ServingCustomerPage = () => {
 
 const styles = {
   container: {
+    overflow: 'hidden',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
