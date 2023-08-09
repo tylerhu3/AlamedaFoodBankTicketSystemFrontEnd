@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Table, Button, Input, Checkbox } from 'antd';
-import CreateTicketForm from './CreateTicketForm';
+import { saveAs } from 'file-saver'; // Import the file-saver library
 
 const TicketList3 = () => {
   const [tickets, setTickets] = useState([]);
-  const [editableTicketId, setEditableTicketId] = useState(null);
   const [sorting, setSorting] = useState({});
 
   useEffect(() => {
@@ -14,9 +13,7 @@ const TicketList3 = () => {
       .then((data) => {
         console.log(data); // Log the fetched data
         setTickets(data);
-        if (data.length > 0) {
-          setEditableTicketId(data[0].id); // Set the default editable ticket ID to the first ticket
-        }
+
       })
       .catch((error) => console.error('Error fetching tickets:', error));
 
@@ -34,11 +31,6 @@ const TicketList3 = () => {
       eventSource.close(); // Close the SSE connection when the component unmounts
     };
   }, []);
-
-  const handleTicketCreated = (newTicket) => {
-    // Add the new ticket to the existing list
-    setTickets((prevTickets) => [...prevTickets, newTicket]);
-  };
 
   const handleSaveClick = (ticketId) => {
     console.log("handleSaveClick: ", ticketId)
@@ -101,6 +93,26 @@ const TicketList3 = () => {
     setTickets(sortedTickets);
   };
   
+  const handleExportCsv = () => {
+    const csvData = tickets.map((ticket) => {
+      return [
+        ticket.id,
+        ticket.firstName,
+        ticket.lastName,
+        ticket.scheduleAppointment,
+        ticket.firstTimeVisitor,
+        ticket.time,
+        ticket.positionInLine,
+        ticket.additionalNotes,
+        ticket.done,
+      ].join(',');
+    });
+
+    const csvContent = ['ID,First Name,Last Name,Schedule Appointment,First Time Visitor,Time,Position in Line,Additional Notes,Done'].concat(csvData).join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+    saveAs(blob, 'tickets.csv');
+  };
 
   const sortTicketsByPosition = (columnKey) => {
     const order = sorting[columnKey] === 'asc' ? 'desc' : 'asc';
@@ -250,8 +262,9 @@ const TicketList3 = () => {
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>Ticketing System Admin Mode</h2>
+      <h2 style={styles.title}>Ticketing System Administrator Mode</h2>
       <Table dataSource={tickets} columns={columns} rowKey="id" />
+      <Button style={{marginLeft: '15px'}} type="primary" onClick={handleExportCsv}>Export CSV</Button>
     </div>
   );
 };

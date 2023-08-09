@@ -14,7 +14,7 @@ const App = () => {
     <Router>
       <Routes>
         {/* Add your existing routes */}
-        <Route path="/" element={<TicketList/>} />
+        <Route path="/" element={<TicketList3/>} />
         <Route path="/tickets" element={<TicketList/>} />
         <Route path="/tickets2" element={<TicketList2/>} />
         <Route path="/tickets3" element={<TicketList3/>} />
