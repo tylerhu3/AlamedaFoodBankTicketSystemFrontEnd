@@ -8,7 +8,7 @@ const CreateTicketForm2 = () => {
 
     const fetchLatestTicket = async () => {
         try {
-            const response = await fetch('http://localhost:3000/tickets/latest');
+            const response = await fetch('http://'+ window.location.hostname +':3000/tickets/latest');
             if (response.ok) {
                 const data = await response.json();
                 setLatestTicket(data);
@@ -28,7 +28,7 @@ const CreateTicketForm2 = () => {
     useEffect(() => {
         fetchLatestTicket();
         // Fetch tickets data from the backend to get the total number of tickets
-        fetch('http://localhost:3000/tickets')
+        fetch('http://'+ window.location.hostname +':3000/tickets')
             .then((response) => response.json())
             .then((data) => {
                 // Set the positionInLine to the next position in line (totalTickets + 1)
@@ -50,7 +50,7 @@ const CreateTicketForm2 = () => {
             time: currentTime,
         };
 
-        fetch('http://localhost:3000/tickets', {
+        fetch('http://'+ window.location.hostname +':3000/tickets', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -60,7 +60,7 @@ const CreateTicketForm2 = () => {
             .then((response) => response.json())
             .then((data) => {
                 // Fetch tickets data again to get the total number of tickets (including the newly created one)
-                fetch('http://localhost:3000/tickets')
+                fetch('http://'+ window.location.hostname +':3000/tickets')
                     .then((response) => response.json())
                     .then((data) => {
                         // Update the positionInLine to the next position in line

@@ -26,7 +26,7 @@ const ServingCustomerPage = () => {
           console.log("space pressed")
           const updatedTicket = { ...currentTicket, done: true };
           // Update the ticket data on the backend using the PUT request
-          fetch(`http://localhost:3000/tickets/${currentTicket.id}`, {
+          fetch(`http://'+ window.location.hostname +':3000/tickets/${currentTicket.id}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ const ServingCustomerPage = () => {
   }, [currentTicket]);
 
   const fetchNextTicket = () => {
-    fetch('http://localhost:3000/tickets/nextInLine')
+    fetch('http://'+ window.location.hostname +':3000/tickets/nextInLine')
       .then((response) => response.json())
       .then((data) => {
         console.log(data);

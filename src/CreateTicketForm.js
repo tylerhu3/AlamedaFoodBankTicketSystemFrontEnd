@@ -15,7 +15,7 @@ const CreateTicketForm = ({ onTicketCreated }) => {
 
   useEffect(() => {
     // Fetch tickets data from the backend to get the total number of tickets
-    fetch('http://localhost:3000/tickets')
+    fetch('http://'+ window.location.hostname +':3000/tickets')
       .then((response) => response.json())
       .then((data) => {
         setTotalTickets(data.length);
@@ -47,7 +47,7 @@ const CreateTicketForm = ({ onTicketCreated }) => {
       time: currentTime,
     };
   
-    fetch('http://localhost:3000/tickets', {
+    fetch('http://'+ window.location.hostname +':3000/tickets', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ const CreateTicketForm = ({ onTicketCreated }) => {
         onTicketCreated(data);
   
         // Fetch tickets data again to get the total number of tickets (including the newly created one)
-        fetch('http://localhost:3000/tickets')
+        fetch('http://'+ window.location.hostname +':3000/tickets')
           .then((response) => response.json())
           .then((data) => {
             setTotalTickets(data.length);

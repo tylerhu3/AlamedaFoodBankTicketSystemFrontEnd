@@ -9,7 +9,7 @@ const ServingCustomerPage = () => {
 
   useEffect(() => {
     // Fetch tickets data from the backend
-    fetch('http://localhost:3000/nextInLine')
+    fetch('http://'+ window.location.hostname +':3000/nextInLine')
       .then((response) => response.json())
       .then((data) => {
         console.log(data); // Log the fetched data

@@ -8,7 +8,7 @@ const TicketList3 = () => {
 
   useEffect(() => {
     // Fetch tickets data from the backend
-    fetch('http://localhost:3000/tickets')
+    fetch('http://'+ window.location.hostname +':3000/tickets')
       .then((response) => response.json())
       .then((data) => {
         console.log(data); // Log the fetched data
@@ -18,7 +18,7 @@ const TicketList3 = () => {
       .catch((error) => console.error('Error fetching tickets:', error));
 
     // Set up the SSE connection to listen for updates
-    const eventSource = new EventSource('http://localhost:3000/sse/tickets');
+    const eventSource = new EventSource('http://'+ window.location.hostname +':3000/sse/tickets');
     eventSource.onmessage = (event) => {
       const updatedTicket = JSON.parse(event.data);
       console.log('Ticket Updated');
@@ -38,7 +38,7 @@ const TicketList3 = () => {
     const ticketToSave = tickets.find((ticket) => ticket.id === ticketId);
     console.log("ticketToSave: ", ticketToSave)
     // Update the ticket data on the backend using the PUT request
-    fetch(`http://localhost:3000/tickets/${ticketId}`, {
+    fetch(`http://'+ window.location.hostname +':3000/tickets/${ticketId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -51,7 +51,7 @@ const TicketList3 = () => {
 
   const handleDeleteClick = (ticketId) => {
     // Delete the ticket from the backend using the DELETE request
-    fetch(`http://localhost:3000/tickets/${ticketId}`, {
+    fetch(`http://'+ window.location.hostname +':3000/tickets/${ticketId}`, {
       method: 'DELETE',
     })
       .then((response) => {

@@ -2,12 +2,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // Change this line
 
-import TicketList from './TicketList';
-import TicketList2 from './TicketList2';
 import TicketList3 from './TicketList3';
 import CreateTicketForm from './CreateTicketForm';
 import ServingCustomerPage from './ServingCustomerPage';
 import CreateTicketForm2 from './CreateTicketForm2';
+const serverIP = window.location.hostname; // This gets the current IP address of the device
 
 const App = () => {
   return (
@@ -15,9 +14,7 @@ const App = () => {
       <Routes>
         {/* Add your existing routes */}
         <Route path="/" element={<TicketList3/>} />
-        <Route path="/tickets" element={<TicketList/>} />
-        <Route path="/tickets2" element={<TicketList2/>} />
-        <Route path="/tickets3" element={<TicketList3/>} />
+        <Route path="/admin" element={<TicketList3/>} />
 
         <Route path="/createTicket" element={<CreateTicketForm />} />
         <Route path="/createTicket2" element={<CreateTicketForm2 />} />
