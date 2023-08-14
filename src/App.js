@@ -1,12 +1,12 @@
 // App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // Change this line
+import { ToastContainer } from 'react-toastify';
 
 import TicketList3 from './TicketList3';
 import CreateTicketForm from './CreateTicketForm';
 import ServingCustomerPage from './ServingCustomerPage';
 import CreateTicketForm2 from './CreateTicketForm2';
-const serverIP = window.location.hostname; // This gets the current IP address of the device
 
 const App = () => {
   return (
