@@ -117,7 +117,8 @@ fetchLatestTicket();
                 </Form.Item>
 
                 <Form.Item label="Additional Notes" initialValue={""} name="additionalNotes" rules={[{ required: false }]}>
-                    <Input />
+                <Input.TextArea rows={4} />
+
                 </Form.Item>
         
                 <Form.Item name="firstTimeVisitor" valuePropName="checked" initialValue={0}>

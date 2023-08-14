@@ -3,7 +3,6 @@ import { Table, Button, Input, Checkbox, message } from 'antd';
 import { saveAs } from 'file-saver'; // Import the file-saver library
 import { toast } from 'react-toastify'; // Assuming you're using react-toastify for toast notifications
 import { ToastContainer } from 'react-toastify';
-import { ReloadOutlined } from '@ant-design/icons';
 import 'react-toastify/dist/ReactToastify.css';
 
 const TicketList3 = () => {
@@ -358,10 +357,11 @@ const TicketList3 = () => {
             dataIndex: 'additionalNotes',
             key: 'additionalNotes',
             render: (text, record) => (
-                <Input
-                    value={record.additionalNotes}
-                    onChange={(e) => handleFieldChange(record.id, 'additionalNotes', e.target.value)}
-                />
+                <textarea
+                value={record.additionalNotes}
+                onChange={(e) => handleFieldChange(record.id, 'additionalNotes', e.target.value)}
+                style={{ width: '100%', minHeight: 100 }}
+            />
             ),
             onHeaderCell: () => ({
                 onClick: () => sortTickets('additionalNotes'),
@@ -400,11 +400,15 @@ const TicketList3 = () => {
     return (
         <div style={styles.container}>
             <h2 style={styles.title}>Ticketing System Administrator Mode</h2>
-            <Table dataSource={tickets} columns={columns} rowKey="id" pagination={{ pageSize: 50 }} />
-            <Button style={{ marginLeft: '15px' }} type="primary" onClick={handleExportCsv}>Export CSV</Button>
-            <div style={styles.saveAllButton}>
+            <div style={styles.buttonsTopLeft}>
+                <Button style={{ marginRight: '15px' }} type="primary" onClick={handleExportCsv}>Export CSV</Button>
                 <Button type="primary" onClick={handleSaveAllClick}>Save All</Button>
             </div>
+            <Table dataSource={tickets} columns={columns} rowKey="id" pagination={{ pageSize: 50 }} />
+            {/* <Button style={{ marginLeft: '15px' }} type="primary" onClick={handleExportCsv}>Export CSV</Button>
+            <div style={styles.saveAllButton}>
+                <Button type="primary" onClick={handleSaveAllClick}>Save All</Button>
+            </div> */}
             <ToastContainer />
 
         </div>
@@ -418,11 +422,11 @@ const styles = {
     title: {
         textAlign: 'center'
     },
-    saveAllButton: {
+    buttonsTopLeft: {
         position: 'absolute',
-        right: '30px',
-        bottom: '30px'
-    }
+        top: '30px', // Adjust the top position
+        left: '30px', // Adjust the left position
+    },
 };
 
 export default TicketList3;
