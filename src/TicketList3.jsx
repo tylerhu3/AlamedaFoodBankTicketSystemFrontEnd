@@ -114,6 +114,10 @@ const TicketList3 = () => {
         // Delete the ticket from the backend using the DELETE request
         fetch(`http://${window.location.hostname}:8888/tickets/${ticketId}`, {
             method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Session-Id': sessionId // Include the session ID as a custom header
+            },
         })
             .then((response) => {
                 if (response.ok) {
@@ -239,11 +243,37 @@ const TicketList3 = () => {
                 });
         });
     };
-
-    const options = {
-        timeZone: 'America/Los_Angeles',
-        timeZoneName: 'short'
+    const handleToggleDoneClick = (ticketId) => {
+        // Find the ticket to be toggled from the tickets array
+        const ticketToToggle = tickets.find((ticket) => ticket.id === ticketId);
+    
+        // Toggle the "done" value
+        const updatedDoneValue = !ticketToToggle.done;
+        ticketToToggle.done = !ticketToToggle.done;
+        // Update the ticket's "done" status on the backend using the PUT request
+        fetch(`http://${window.location.hostname}:8888/tickets/${ticketId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Session-Id': sessionId // Include the session ID as a custom header
+            },
+            body: JSON.stringify(ticketToToggle), // Only send the "done" field in the update payload
+        })
+            .then((response) => {
+                if (response.ok) {
+                    // Update the "done" value in the frontend state
+                    handleFieldChange(ticketId, 'done', updatedDoneValue);
+                    message.success('Ticket status updated successfully!'); // Show success toast message
+                } else {
+                    message.error('Failed to update ticket status. Please try again.'); // Show error toast message
+                }
+            })
+            .catch((error) => {
+                console.error('Error updating ticket status:', error);
+                message.error('An error occurred while updating the ticket status. Please try again.'); // Show error toast message
+            });
     };
+    
 
     const columns = [
         {
@@ -311,7 +341,7 @@ const TicketList3 = () => {
             }),
         },
         {
-            title: ' Sign In Time',
+            title: 'Sign In Time',
             dataIndex: 'time',
             key: 'time',
             render: (text, record) => (
@@ -371,10 +401,13 @@ const TicketList3 = () => {
             dataIndex: 'done',
             key: 'done',
             render: (text, record) => (
-                <Checkbox
-                    checked={record.done}
-                    onChange={(e) => handleFieldChange(record.id, 'done', e.target.checked)}
-                />
+                <Button 
+                onClick={() => handleToggleDoneClick(record.id)}
+                style={{
+                    backgroundColor: record.done ? 'green' : 'red',
+                    color: 'white',
+                }}
+                >{record.done ? 'Done' : 'Not Done'}</Button>
             ),
             onHeaderCell: () => ({
                 onClick: () => sortTickets('done'),

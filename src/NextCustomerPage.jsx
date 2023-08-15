@@ -186,7 +186,6 @@ const NextCustomerPage = () => {
         Current Time: {new Date().toISOString()}
 
       </div> */}
-      <br />
       <div style={styles.container}>
         {console.log("Serving Customers!")}
         <h2 style={styles.servingText}>Serving Customer Number</h2>
