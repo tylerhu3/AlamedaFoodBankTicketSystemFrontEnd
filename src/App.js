@@ -1,11 +1,11 @@
 // App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // Change this line
-import { ToastContainer } from 'react-toastify';
 
 import TicketList3 from './TicketList3';
 import CreateTicketForm from './CreateTicketForm';
 import ServingCustomerPage from './ServingCustomerPage';
+import NextCustomerPage from './NextCustomerPage';
 import CreateTicketForm2 from './CreateTicketForm2';
 
 const App = () => {
@@ -13,7 +13,7 @@ const App = () => {
     <Router>
       <Routes>
         {/* Add your existing routes */}
-        <Route path="/" element={<TicketList3/>} />
+        {/* <Route path="/" element={<TicketList3/>} /> */}
         <Route path="/admin" element={<TicketList3/>} />
 
         <Route path="/createTicket" element={<CreateTicketForm />} />
@@ -21,6 +21,7 @@ const App = () => {
 
         {/* New route for the "Serving Customer" page */}
         <Route path="/servingCustomer" element={<ServingCustomerPage />} />
+        <Route path="/" element={<NextCustomerPage />} />
       </Routes>
     </Router>
   );

@@ -9,6 +9,8 @@ const TicketList3 = () => {
     const [tickets, setTickets] = useState([]);
     const [sorting, setSorting] = useState({});
     const [sessionId, setSessionId] = useState(generateUniqueSessionId());
+    const [showDoneItems, setShowDoneItems] = useState(true);
+
     // State to track whether the toast is visible
     const isToastVisibleRef = useRef(false);
 
@@ -16,7 +18,7 @@ const TicketList3 = () => {
     useEffect(() => {
 
         // Fetch tickets data from the backend
-        fetch('http://' + window.location.hostname + ':3000/tickets')
+        fetch('http://' + window.location.hostname + ':8888/tickets')
             .then((response) => response.json())
             .then((data) => {
                 console.log(data); // Log the fetched data
@@ -26,7 +28,7 @@ const TicketList3 = () => {
             .catch((error) => console.error('Error fetching tickets:', error));
 
         // Set up the SSE connection to listen for updates
-        const eventSource = new EventSource('http://' + window.location.hostname + ':3000/sse/tickets');
+        const eventSource = new EventSource('http://' + window.location.hostname + ':8888/sse/tickets');
         // Open a connection to the SSE endpoint
 
         eventSource.addEventListener('update', (event) => {
@@ -34,39 +36,39 @@ const TicketList3 = () => {
             try {
                 const updateInfo = JSON.parse(event.data);
                 // Handle updates and show the toast message
-            // You can customize the toast content, appearance, and behavior
-            console.log("Recevived call", updateInfo)
-            // Check if the update's session ID matches the current session's ID
+                // You can customize the toast content, appearance, and behavior
+                console.log("Recevived call", updateInfo)
+                // Check if the update's session ID matches the current session's ID
 
-            console.log("updateInfo.sessionId", updateInfo.sessionId)
-            console.log("sessionId", sessionId)
-            console.log("isToastVisibleRef", isToastVisibleRef)
-            if (isToastVisibleRef.current == false && updateInfo.sessionId !== sessionId) {
-                console.log("Session Id different")
-                isToastVisibleRef.current = true; // Update the ref to true
-                console.log("isToastVisible: ", isToastVisibleRef)
-                const toastId = toast('Database has been updated. Click Here to reload. ', {
-                    position: "top-right",
-                    autoClose: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    onClick: () => window.location.reload() // Reload the page when the toast is clicked
-                    // You can add a button to refresh the page
-                });
+                console.log("updateInfo.sessionId", updateInfo.sessionId)
+                console.log("sessionId", sessionId)
+                console.log("isToastVisibleRef", isToastVisibleRef)
+                if (isToastVisibleRef.current == false && updateInfo.sessionId !== sessionId) {
+                    console.log("Session Id different")
+                    isToastVisibleRef.current = true; // Update the ref to true
+                    console.log("isToastVisible: ", isToastVisibleRef)
+                    const toastId = toast('Database has been updated. Click Here to reload. ', {
+                        position: "top-right",
+                        autoClose: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        onClick: () => window.location.reload() // Reload the page when the toast is clicked
+                        // You can add a button to refresh the page
+                    });
 
                     // Set up a callback to be called when the toast is dismissed
-             toast.onChange(() => {
-            if (!toast.isActive(toastId)) {
-                isToastVisibleRef.current = false; 
-            }
-          });
+                    toast.onChange(() => {
+                        if (!toast.isActive(toastId)) {
+                            isToastVisibleRef.current = false;
+                        }
+                    });
 
-            }
-              } catch (error) {
+                }
+            } catch (error) {
                 console.error('Failed to parse JSON data:', error, 'Raw data:', event.data);
-              }
+            }
         });
 
         return () => {
@@ -77,21 +79,17 @@ const TicketList3 = () => {
     function generateUniqueSessionId() {
         const timestamp = new Date().getTime();
         const randomPart = Math.random().toString(36).substr(2, 9);
-        var x =  `session-${timestamp}-${randomPart}`
+        var x = `session-${timestamp}-${randomPart}`
         console.log("generateUniqueSessionId", x)
         return `session-${timestamp}-${randomPart}`;
     }
-
-    const refreshPage = () => {
-        window.location.reload(); // Or call your method to reload the data
-    };
 
     const handleSaveClick = (ticketId) => {
         // Find the ticket to be saved from the tickets array
         const ticketToSave = tickets.find((ticket) => ticket.id === ticketId);
 
         // Update the ticket data on the backend using the PUT request
-        fetch(`http://${window.location.hostname}:3000/tickets/${ticketId}`, {
+        fetch(`http://${window.location.hostname}:8888/tickets/${ticketId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -114,7 +112,7 @@ const TicketList3 = () => {
 
     const handleDeleteClick = (ticketId) => {
         // Delete the ticket from the backend using the DELETE request
-        fetch(`http://${window.location.hostname}:3000/tickets/${ticketId}`, {
+        fetch(`http://${window.location.hostname}:8888/tickets/${ticketId}`, {
             method: 'DELETE',
         })
             .then((response) => {
@@ -163,6 +161,7 @@ const TicketList3 = () => {
                 ticket.firstName,
                 ticket.lastName,
                 ticket.scheduleAppointment,
+                ticket.scheduleAppointmentTime,
                 ticket.firstTimeVisitor,
                 ticket.time,
                 ticket.positionInLine,
@@ -171,7 +170,7 @@ const TicketList3 = () => {
             ].join(',');
         });
 
-        const csvContent = ['ID,First Name,Last Name,Schedule Appointment,First Time Visitor,Time,Position in Line,Additional Notes,Done'].concat(csvData).join('\n');
+        const csvContent = ['ID,First Name,Last Name,Schedule Appointment,Schedule Appointment Time,First Time Visitor, Sign In Time,Position in Line,Additional Notes,Done'].concat(csvData).join('\n');
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
         saveAs(blob, 'tickets.csv');
@@ -219,7 +218,7 @@ const TicketList3 = () => {
             const ticketToSave = tickets.find((t) => t.id === ticket.id);
 
             // Update the ticket data on the backend using the PUT request
-            fetch(`http://${window.location.hostname}:3000/tickets/${ticket.id}`, {
+            fetch(`http://${window.location.hostname}:8888/tickets/${ticket.id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -244,7 +243,7 @@ const TicketList3 = () => {
     const options = {
         timeZone: 'America/Los_Angeles',
         timeZoneName: 'short'
-      };
+    };
 
     const columns = [
         {
@@ -312,11 +311,11 @@ const TicketList3 = () => {
             }),
         },
         {
-            title: 'Time',
+            title: ' Sign In Time',
             dataIndex: 'time',
             key: 'time',
             render: (text, record) => (
-                <span>{new Date(record.time).toLocaleString('en-US', options)}</span>
+                <span>{new Date(record.time).toISOString()}</span>
             ),
             onHeaderCell: () => ({
                 onClick: () => sortTickets('time'),
@@ -329,7 +328,7 @@ const TicketList3 = () => {
             render: (text, record) => (
                 <span>
                     {record.scheduleAppointmentTime
-                        ? new Date(record.scheduleAppointmentTime).toLocaleString('en-US', options)
+                        ? new Date(record.scheduleAppointmentTime).toISOString()
                         : 'N/A'}
                 </span>
             ),
@@ -358,10 +357,10 @@ const TicketList3 = () => {
             key: 'additionalNotes',
             render: (text, record) => (
                 <textarea
-                value={record.additionalNotes}
-                onChange={(e) => handleFieldChange(record.id, 'additionalNotes', e.target.value)}
-                style={{ width: '100%', minHeight: 100 }}
-            />
+                    value={record.additionalNotes}
+                    onChange={(e) => handleFieldChange(record.id, 'additionalNotes', e.target.value)}
+                    style={{ width: '100%', minHeight: 100 }}
+                />
             ),
             onHeaderCell: () => ({
                 onClick: () => sortTickets('additionalNotes'),
@@ -403,12 +402,18 @@ const TicketList3 = () => {
             <div style={styles.buttonsTopLeft}>
                 <Button style={{ marginRight: '15px' }} type="primary" onClick={handleExportCsv}>Export CSV</Button>
                 <Button type="primary" onClick={handleSaveAllClick}>Save All</Button>
+                <div style={{ marginTop: '10px' }}>
+                    <Checkbox checked={showDoneItems} onChange={() => setShowDoneItems(!showDoneItems)}>
+                        Show Done Items
+                    </Checkbox>
+                </div>
             </div>
-            <Table dataSource={tickets} columns={columns} rowKey="id" pagination={{ pageSize: 50 }} />
-            {/* <Button style={{ marginLeft: '15px' }} type="primary" onClick={handleExportCsv}>Export CSV</Button>
-            <div style={styles.saveAllButton}>
-                <Button type="primary" onClick={handleSaveAllClick}>Save All</Button>
-            </div> */}
+            <Table
+                dataSource={tickets.filter(ticket => (showDoneItems || !ticket.done))}
+                columns={columns}
+                rowKey="id"
+            />
+
             <ToastContainer />
 
         </div>

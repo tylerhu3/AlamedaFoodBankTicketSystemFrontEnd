@@ -5,6 +5,16 @@ import DvdLogo from './FoodIcon';
 const ServingCustomerPage = () => {
   // Assuming you have the customer number stored in a variable
   const [currentTicket, setCurrentTicket] = useState(null);
+
+  const fetchNextTicket = () => {
+    fetch('http://'+ window.location.hostname +':8888/tickets/nextInLine')
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        setCurrentTicket(data);
+      })
+      .catch((error) => console.error('Error fetching next ticket:', error));
+  };
   useEffect(() => {
     // Initial fetch of the next ticket
     fetchNextTicket();
@@ -26,7 +36,7 @@ const ServingCustomerPage = () => {
           console.log("space pressed")
           const updatedTicket = { ...currentTicket, done: true };
           // Update the ticket data on the backend using the PUT request
-          fetch(`http://${window.location.hostname}:3000/tickets/${currentTicket.id}`, {
+          fetch(`http://${window.location.hostname}:8888/tickets/${currentTicket.id}`, {
             method: 'PUT',
             headers: {
               'Content-Type': 'application/json',
@@ -36,7 +46,6 @@ const ServingCustomerPage = () => {
             .then((response) => response.json())
             .then(() => {
               fetchNextTicket(); // Fetch the next ticket after updating the current one
-              setCurrentTicket(updatedTicket);
             })
             .catch((error) => console.error('Error updating ticket:', error));
         }
@@ -50,15 +59,7 @@ const ServingCustomerPage = () => {
     };
   }, [currentTicket]);
 
-  const fetchNextTicket = () => {
-    fetch('http://'+ window.location.hostname +':3000/tickets/nextInLine')
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        setCurrentTicket(data);
-      })
-      .catch((error) => console.error('Error fetching next ticket:', error));
-  };
+
 
   return (
     <div>

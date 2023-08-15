@@ -9,8 +9,8 @@ const CreateTicketForm2 = () => {
 
     const fetchLatestTicket = async () => {
         try {
-            const response = await fetch('http://' + window.location.hostname + ':3000/tickets/latest');
-            // const response = await fetch('http://localhost:3000/tickets/latest');
+            const response = await fetch('http://' + window.location.hostname + ':8888/tickets/latest');
+            // const response = await fetch('http://localhost:8888/tickets/latest');
             if (response.ok) {
                 const data = await response.json();
                 setLatestTicket(data);
@@ -30,7 +30,7 @@ const CreateTicketForm2 = () => {
     useEffect(() => {
         
     // Fetch tickets data from the backend
-    fetch('http://'+ window.location.hostname +':3000/tickets')
+    fetch('http://'+ window.location.hostname +':8888/tickets')
       .then((response) => response.json())
       .then((data) => {
         console.log(data); // Log the fetched data
@@ -59,7 +59,10 @@ fetchLatestTicket();
 
         if(values.scheduleAppointment){
             const selectedTime = values.scheduleAppointmentTime.toDate().toISOString().slice(0, 16);
+            const currentTimeInRightTimeZone = new Date(selectedTime);
+
             console.log("selectedTime: ", selectedTime);
+            console.log("currentTimeInRightTimeZone: ", currentTimeInRightTimeZone.toLocaleTimeString());
             console.log("values.scheduleAppointmentTime: ", values.scheduleAppointmentTime);
             newData = {
                 ...values,
@@ -70,7 +73,7 @@ fetchLatestTicket();
         }
 
 
-        fetch('http://' + window.location.hostname + ':3000/tickets', {
+        fetch('http://' + window.location.hostname + ':8888/tickets', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -80,7 +83,7 @@ fetchLatestTicket();
             .then((response) => response.json())
             .then((data) => {
                 // Fetch tickets data again to get the total number of tickets (including the newly created one)
-                fetch('http://' + window.location.hostname + ':3000/tickets')
+                fetch('http://' + window.location.hostname + ':8888/tickets')
                     .then((response) => response.json())
                     .then((data) => {
                         // Update the positionInLine to the next position in line
