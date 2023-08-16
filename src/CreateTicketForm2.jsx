@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Form, Input, Checkbox, Button, Modal, TimePicker } from 'antd'; // Import TimePicker
+import dayjs from "dayjs";
+import locale from "dayjs/locale/en";
 
 const CreateTicketForm2 = () => {
     const [form] = Form.useForm();
     const [latestTicket, setLatestTicket] = useState(null);
     const [isDialogVisible, setDialogVisible] = useState(false); // State to manage dialog visibility
     const [showTimePicker, setShowTimePicker] = useState(false); // State for showing TimePicker
+    const [defaultTime, setDefaultTime] = useState(new Date());
 
     const fetchLatestTicket = async () => {
         try {
@@ -28,7 +31,6 @@ const CreateTicketForm2 = () => {
     };
 
     useEffect(() => {
-        
     // Fetch tickets data from the backend
     fetch('http://'+ window.location.hostname +':8888/tickets')
       .then((response) => response.json())
@@ -46,7 +48,7 @@ fetchLatestTicket();
 
     const handleSubmit = (values) => {
         // Create a new ticket with the current time
-        const currentTime = new Date().toISOString().slice(0, 16);
+        const currentTime = new Date().toLocaleTimeString
 
 // Get the selected time from TimePicker
         console.log("values.scheduleAppointment: ", values.scheduleAppointment)
@@ -71,7 +73,6 @@ fetchLatestTicket();
                 scheduleAppointmentTime: selectedTime
             };
         }
-
 
         fetch('http://' + window.location.hostname + ':8888/tickets', {
             method: 'POST',
@@ -142,6 +143,7 @@ fetchLatestTicket();
                 <Form.Item
                     label="Schedule Appointment Time:"
                     name="scheduleAppointmentTime"
+                    changeOnBlur={true}
                     rules={[
                         {
                             required: true,
@@ -149,7 +151,7 @@ fetchLatestTicket();
                         },
                     ]}
                 >
-                    <TimePicker format="hh:mm A" use12Hours minuteStep={15} />
+                    <TimePicker format="hh:mm A" use12Hours minuteStep={30} />
                 </Form.Item>
             )}
 

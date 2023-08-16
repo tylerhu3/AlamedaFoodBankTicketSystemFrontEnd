@@ -8,7 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 const TicketList3 = () => {
     const [tickets, setTickets] = useState([]);
     const [sorting, setSorting] = useState({});
-    const [sessionId, setSessionId] = useState(generateUniqueSessionId());
+    const [sessionId, _] = useState(generateUniqueSessionId());
     const [showDoneItems, setShowDoneItems] = useState(true);
 
     // State to track whether the toast is visible
@@ -16,7 +16,8 @@ const TicketList3 = () => {
 
 
     useEffect(() => {
-
+        const currentTime = new Date();
+        console.log("TYLER:: time: ", currentTime)
         // Fetch tickets data from the backend
         fetch('http://' + window.location.hostname + ':8888/tickets')
             .then((response) => response.json())
@@ -429,8 +430,14 @@ const TicketList3 = () => {
         },
     ];
 
+    const currentimeTest = () => {
+        let currentTime = new Date();
+        return<>{currentTime.toISOString()}</>
+    }
+
     return (
         <div style={styles.container}>
+            
             <h2 style={styles.title}>Ticketing System Administrator Mode</h2>
             <div style={styles.buttonsTopLeft}>
                 <Button style={{ marginRight: '15px' }} type="primary" onClick={handleExportCsv}>Export CSV</Button>
@@ -446,9 +453,8 @@ const TicketList3 = () => {
                 columns={columns}
                 rowKey="id"
             />
-
+            {currentimeTest()}
             <ToastContainer />
-
         </div>
     );
 };

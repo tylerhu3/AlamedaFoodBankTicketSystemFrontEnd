@@ -33,26 +33,47 @@ const NextCustomerPage = () => {
         let currentTime = new Date(currentISO);
         let currentTimeMinusThirty = new Date(currentTime.getTime() - 30 * 60 * 1000);
 
+        let currentTimePlus45Mins = new Date(currentTime.getTime() + 45 * 60 * 1000);
+
         // Separate data into two arrays based on scheduleAppointmentTime
         const within30Mins = [];
         const outside30Mins = [];
         incomingData.forEach(item => {
+          // Insert code to also check if time is 11 to 1130 
+          // and then check if we have appointments from within the next 30 minutes ? 
+          const isBetween11And1130 = isCurrentTimeBetween11And1130();
+          console.log(`TYLER:: DEBUG
+          isBetween11And1130: ${isBetween11And1130}
+          item.scheduleAppointmentTime: ${item.scheduleAppointmentTime} 
+          new Date(item.scheduleAppointmentTime): ${new Date(item.scheduleAppointmentTime)} 
+          currentTimePlusThirty: ${currentTimePlus45Mins}
+          currentTimePlusOneHour: ${currentTimePlus45Mins}
+          `)
 
           if (
+            isBetween11And1130 && item.scheduleAppointmentTime &&
+            new Date(item.scheduleAppointmentTime) >= currentTime &&
+            new Date(item.scheduleAppointmentTime) < currentTimePlus45Mins
+          ) {
+                        console.log("TYLER :: SPECIAL CASE isBetween11And1130", item)
+
+            within30Mins.push(item);
+          }
+          else if (
             item.scheduleAppointmentTime &&
             new Date(item.scheduleAppointmentTime) >=
             currentTimeMinusThirty &&
             new Date(item.scheduleAppointmentTime) <=
             currentTime
           ) {
-            // console.log("TYLER:: Within 30")
-            // console.log("TYLER:: Schedule Time", new Date(item.scheduleAppointmentTime))
-            // console.log("TYLER:: Current time - 30", new Date(currentTimeMinusThirty.getTime() - 30 * 60 * 1000))  
+            console.log("TYLER:: Within 30")
+            console.log("TYLER:: Schedule Time", new Date(item.scheduleAppointmentTime))
+            console.log("TYLER:: Current time - 30", new Date(currentTimeMinusThirty.getTime() - 30 * 60 * 1000))  
             within30Mins.push(item);
           } else {
-            //   console.log("TYLER:: Outside 30")
-            //   console.log("TYLER:: new Date(item.scheduleAppointmentTime)", new Date(item.scheduleAppointmentTime))
-            //   console.log("TYLER:: new Date(currentTime.getTime() - 30 * 60 * 1000)", new Date(currentTime.getTime() - 30 * 60 * 1000))  
+              console.log("TYLER:: Outside 30")
+              console.log("TYLER:: new Date(item.scheduleAppointmentTime)", new Date(item.scheduleAppointmentTime))
+              console.log("TYLER:: new Date(currentTime.getTime() - 30 * 60 * 1000)", new Date(currentTime.getTime() - 30 * 60 * 1000))  
             outside30Mins.push(item);
           }
         });
@@ -76,12 +97,10 @@ const NextCustomerPage = () => {
         ))
         console.log("within30Mins[0]", within30Mins)
 
-        if (within30Mins.length != 0) {
+        if (within30Mins.length !== 0) {
           console.log("within30Mins[0]", within30Mins[0])
           setCurrentTicket(within30Mins[0]);
-        } else if (outside30Mins.length != 0) {
-          // Sort outside30Mins array based on positionInLine
-
+        } else if (outside30Mins.length !== 0) {
           console.log("outside30Min", outside30Mins)
 
           setCurrentTicket(outside30Mins[0]);
@@ -91,63 +110,92 @@ const NextCustomerPage = () => {
       .catch(error => {
         console.error('Error fetching data:', error);
       });
+    console.log("isCurrentTimeBetween11And1130()", isCurrentTimeBetween11And1130());
   };
 
-  useEffect(() => {
+  const isCurrentTimeBetween11And1130 = () => {
+    // Create a Date object for the current time
+    var currentTime = new Date();
 
-    // Set up the SSE connection to listen for updates
-    const eventSource = new EventSource('http://' + window.location.hostname + ':8888/sse/tickets');
-    // Open a connection to the SSE endpoint
+    console.log("currentTime", currentTime.toTimeString())
 
-    eventSource.addEventListener('update', (event) => {
+    // Get the current hours and minutes
+    var currentHours = currentTime.getHours();
+    var currentMinutes = currentTime.getMinutes();
 
-      try {
-        const updateInfo = JSON.parse(event.data);
-        // Handle updates and show the toast message
-        // You can customize the toast content, appearance, and behavior
-        console.log("Recevived call", updateInfo)
-        // Check if the update's session ID matches the current session's ID
+    // Define the start and end times for the range (11:00 AM to 11:30 AM)
+    var startTimeHours = 11;
+    var startTimeMinutes = 0;
+    var endTimeHours = 11;
+    var endTimeMinutes = 30;
 
-        console.log("updateInfo.sessionId", updateInfo.sessionId)
-        console.log("sessionId", sessionId)
-        console.log("isToastVisibleRef", isToastVisibleRef)
+    // Compare the current time with the desired range
+    if (
+      (currentHours > startTimeHours || (currentHours === startTimeHours && currentMinutes >= startTimeMinutes)) &&
+      (currentHours < endTimeHours || (currentHours === endTimeHours && currentMinutes <= endTimeMinutes))
+    ) {
+      console.log("currentTime is between 11 and 1130")
+      return true;
+    } else {
+      console.log("currentTime is NOT between 11 and 1130")
+      return false
+    }
+  }
+  // useEffect(() => {
 
-        if (isToastVisibleRef.current == false && updateInfo.sessionId !== sessionId) {
-          window.location.reload()
-        }
+  //   // Set up the SSE connection to listen for updates
+  //   const eventSource = new EventSource('http://' + window.location.hostname + ':8888/sse/tickets');
+  //   // Open a connection to the SSE endpoint
 
-        // if (isToastVisibleRef.current == false && updateInfo.sessionId !== sessionId) {
-        //     console.log("Session Id different")
-        //     isToastVisibleRef.current = true; // Update the ref to true
-        //     console.log("isToastVisible: ", isToastVisibleRef)
-        //     const toastId = toast('Database has been updated. Click Here to reload. ', {
-        //         position: "top-right",
-        //         autoClose: false,
-        //         closeOnClick: true,
-        //         pauseOnHover: true,
-        //         draggable: true,
-        //         progress: undefined,
-        //         onClick: () => window.location.reload() // Reload the page when the toast is clicked
-        //         // You can add a button to refresh the page
-        //     });
+  //   eventSource.addEventListener('update', (event) => {
 
-        //     // Set up a callback to be called when the toast is dismissed
-        //     toast.onChange(() => {
-        //         if (!toast.isActive(toastId)) {
-        //             isToastVisibleRef.current = false;
-        //         }
-        //     });
+  //     try {
+  //       const updateInfo = JSON.parse(event.data);
+  //       // Handle updates and show the toast message
+  //       // You can customize the toast content, appearance, and behavior
+  //       console.log("Recevived call", updateInfo)
+  //       // Check if the update's session ID matches the current session's ID
 
-        // }
-      } catch (error) {
-        console.error('Failed to parse JSON data:', error, 'Raw data:', event.data);
-      }
-    });
+  //       console.log("updateInfo.sessionId", updateInfo.sessionId)
+  //       console.log("sessionId", sessionId)
+  //       console.log("isToastVisibleRef", isToastVisibleRef)
 
-    return () => {
-      eventSource.close(); // Close the SSE connection when the component unmounts
-    };
-  }, []);
+  //       if (isToastVisibleRef.current == false && updateInfo.sessionId !== sessionId) {
+  //         window.location.reload()
+  //       }
+
+  //       // if (isToastVisibleRef.current == false && updateInfo.sessionId !== sessionId) {
+  //       //     console.log("Session Id different")
+  //       //     isToastVisibleRef.current = true; // Update the ref to true
+  //       //     console.log("isToastVisible: ", isToastVisibleRef)
+  //       //     const toastId = toast('Database has been updated. Click Here to reload. ', {
+  //       //         position: "top-right",
+  //       //         autoClose: false,
+  //       //         closeOnClick: true,
+  //       //         pauseOnHover: true,
+  //       //         draggable: true,
+  //       //         progress: undefined,
+  //       //         onClick: () => window.location.reload() // Reload the page when the toast is clicked
+  //       //         // You can add a button to refresh the page
+  //       //     });
+
+  //       //     // Set up a callback to be called when the toast is dismissed
+  //       //     toast.onChange(() => {
+  //       //         if (!toast.isActive(toastId)) {
+  //       //             isToastVisibleRef.current = false;
+  //       //         }
+  //       //     });
+
+  //       // }
+  //     } catch (error) {
+  //       console.error('Failed to parse JSON data:', error, 'Raw data:', event.data);
+  //     }
+  //   });
+
+  //   return () => {
+  //     eventSource.close(); // Close the SSE connection when the component unmounts
+  //   };
+  // }, []);
 
   useEffect(() => {
     const handleKeyPress = (event) => {
