@@ -1,7 +1,6 @@
 // NextCustomerPage.js
 import React, { useEffect, useRef, useState } from 'react';
 import DvdLogo from './FoodIcon';
-import { toast } from 'react-toastify'; // Assuming you're using react-toastify for toast notifications
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -26,7 +25,7 @@ const NextCustomerPage = () => {
   }
 
   const fetchNextTicket = () => {
-    fetch('http://localhost:8888/tickets/not-done-from-last-12-hours')
+    fetch('http://' + window.location.hostname + ':8888/tickets/not-done-from-last-12-hours')
       .then(response => response.json())
       .then(incomingData => {
         const currentISO = new Date().toISOString().slice(0, 16); // Current time
@@ -90,11 +89,15 @@ const NextCustomerPage = () => {
         within30Mins.map(item => (
           console.log("Tyler:", item)
         ))
+
         outside30Mins.sort((a, b) => a.positionInLine - b.positionInLine);
+        
         console.log("Outsite 30 mins:")
+        
         outside30Mins.map(item => (
           console.log("Tyler:", item)
         ))
+        
         console.log("within30Mins[0]", within30Mins)
 
         if (within30Mins.length !== 0) {
@@ -102,15 +105,15 @@ const NextCustomerPage = () => {
           setCurrentTicket(within30Mins[0]);
         } else if (outside30Mins.length !== 0) {
           console.log("outside30Min", outside30Mins)
-
           setCurrentTicket(outside30Mins[0]);
+        } else{
+          setCurrentTicket(null)
         }
 
       })
       .catch(error => {
         console.error('Error fetching data:', error);
       });
-    console.log("isCurrentTimeBetween11And1130()", isCurrentTimeBetween11And1130());
   };
 
   const isCurrentTimeBetween11And1130 = () => {

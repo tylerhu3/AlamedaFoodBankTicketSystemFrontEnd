@@ -143,7 +143,6 @@ fetchLatestTicket();
                 <Form.Item
                     label="Schedule Appointment Time:"
                     name="scheduleAppointmentTime"
-                    changeOnBlur={true}
                     rules={[
                         {
                             required: true,
