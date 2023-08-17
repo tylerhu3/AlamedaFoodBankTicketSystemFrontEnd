@@ -1,25 +1,36 @@
 import React, { useEffect, useRef } from 'react';
-import { FaPizzaSlice, FaHamburger, FaIceCream, FaCoffee } from 'react-icons/fa'; // Importing food-themed icons
+import {FaRegLemon, FaCarrot, FaBeer, FaPizzaSlice, FaHamburger, FaIceCream, FaCoffee } from 'react-icons/fa';
 
 const DvdLogo = () => {
   const dvdRef = useRef(null);
+
+  const foodIcons = [FaRegLemon, FaCarrot, FaBeer, FaPizzaSlice, FaHamburger, FaIceCream, FaCoffee];
+  const randomIconIndex = Math.floor(Math.random() * foodIcons.length);
+  const RandomIcon = foodIcons[randomIconIndex];
+
+  const getRandomColor = () => {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+  };
+
   useEffect(() => {
     const dvdLogo = dvdRef.current;
 
     let x = 0;
     let y = 0;
-    let xVelocity = 3; // Horizontal velocity
-    let yVelocity = 3; // Vertical velocity
+    let xVelocity = 3;
+    let yVelocity = 3;
 
     const animate = () => {
-      // Get the current position of the logo
       const logoPosition = dvdLogo.getBoundingClientRect();
 
-      // Update the x and y position based on the velocity
       x += xVelocity;
       y += yVelocity;
 
-      // Check if the logo has hit the screen boundaries and reverse the velocity if necessary
       if (x + logoPosition.width >= window.innerWidth - 3 || x <= 0) {
         xVelocity = -xVelocity;
       }
@@ -27,42 +38,37 @@ const DvdLogo = () => {
         yVelocity = -yVelocity;
       }
 
-      // Set the new position of the logo
       dvdLogo.style.transform = `translate(${x}px, ${y}px)`;
 
-      // Repeat the animation
       requestAnimationFrame(animate);
     };
 
-    // Start the animation loop
     animate();
 
     return () => {
-      // Clean up the animation frame on component unmount
       cancelAnimationFrame(animate);
     };
   }, []);
+
+  const iconColor = getRandomColor();
+
   return (
-    <div ref={dvdRef} style={styles.dvdLogo}>
-      {/* Use the IoCoffeeOutline icon from react-icons/io5 */}
-      <FaHamburger size={80} style={styles.icon} />
-    
+    <div ref={dvdRef} style={{ ...styles.dvdLogo, background: iconColor }}>
+      <RandomIcon size={80} style={styles.icon} />
     </div>
   );
 };
 
 const styles = {
-    dvdLogo: {
-        padding:'20px',
-        position: 'absolute',
-        width: '80px',
-        background: 'pink',
-        height: '80px',
-        // background: 'red', // Placeholder background color
-        borderRadius: '65px',
-      },
+  dvdLogo: {
+    padding: '20px',
+    position: 'absolute',
+    width: '80px',
+    height: '80px',
+    borderRadius: '50%',
+  },
   icon: {
-    color: 'white', // Color for the coffee icon
+    color: 'white',
   },
 };
 

@@ -38,37 +38,10 @@ const TicketList3 = () => {
                 const updateInfo = JSON.parse(event.data);
                 // Handle updates and show the toast message
                 // You can customize the toast content, appearance, and behavior
-                console.log("Recevived call", updateInfo)
-                // Check if the update's session ID matches the current session's ID
-
-                console.log("updateInfo.sessionId", updateInfo.sessionId)
-                console.log("sessionId", sessionId)
-                console.log("isToastVisibleRef", isToastVisibleRef)
-                if (isToastVisibleRef.current == false && updateInfo.sessionId !== sessionId) {
-                    console.log("Session Id different")
-                    isToastVisibleRef.current = true; // Update the ref to true
-                    console.log("isToastVisible: ", isToastVisibleRef)
-                    const toastId = toast('Database has been updated. Click Here to reload. ', {
-                        position: "top-right",
-                        autoClose: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        progress: undefined,
-                        onClick: () => window.location.reload() // Reload the page when the toast is clicked
-                        // You can add a button to refresh the page
-                    });
-
-                    // Set up a callback to be called when the toast is dismissed
-                    toast.onChange(() => {
-                        if (!toast.isActive(toastId)) {
-                            isToastVisibleRef.current = false;
-                        }
-                    });
-
-                }
+                showUpdatedDBToast(updateInfo)
             } catch (error) {
                 console.error('Failed to parse JSON data:', error, 'Raw data:', event.data);
+                eventSource.close(); 
             }
         });
 
@@ -76,6 +49,38 @@ const TicketList3 = () => {
             eventSource.close(); // Close the SSE connection when the component unmounts
         };
     }, []);
+
+    function showUpdatedDBToast(updateInfo){
+        console.log("Recevived call", updateInfo)
+        // Check if the update's session ID matches the current session's ID
+
+        console.log("updateInfo.sessionId", updateInfo.sessionId)
+        console.log("sessionId", sessionId)
+        console.log("isToastVisibleRef", isToastVisibleRef)
+        if (isToastVisibleRef.current == false && updateInfo.sessionId !== sessionId) {
+            console.log("Session Id different")
+            isToastVisibleRef.current = true; // Update the ref to true
+            console.log("isToastVisible: ", isToastVisibleRef)
+            const toastId = toast('Database has been updated. Click Here to reload. ', {
+                position: "top-right",
+                autoClose: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                onClick: () => window.location.reload() // Reload the page when the toast is clicked
+                // You can add a button to refresh the page
+            });
+
+            // Set up a callback to be called when the toast is dismissed
+            toast.onChange(() => {
+                if (!toast.isActive(toastId)) {
+                    isToastVisibleRef.current = false;
+                }
+            });
+
+        }
+    }
 
     function generateUniqueSessionId() {
         const timestamp = new Date().getTime();
@@ -346,7 +351,7 @@ const TicketList3 = () => {
             dataIndex: 'time',
             key: 'time',
             render: (text, record) => (
-                <span>{new Date(record.time).toISOString()}</span>
+                <span>{new Date(record.time).toLocaleString()}</span>
             ),
             onHeaderCell: () => ({
                 onClick: () => sortTickets('time'),
@@ -359,7 +364,7 @@ const TicketList3 = () => {
             render: (text, record) => (
                 <span>
                     {record.scheduleAppointmentTime
-                        ? new Date(record.scheduleAppointmentTime).toISOString()
+                        ? new Date(record.scheduleAppointmentTime).toLocaleString()
                         : 'N/A'}
                 </span>
             ),
@@ -430,6 +435,23 @@ const TicketList3 = () => {
         },
     ];
 
+      const handleRefreshClick = () => {
+    // Send a request to the backend with the "RefreshToken" header
+    fetch('http://localhost:8888/refresh', {
+      method: 'GET',
+      headers: {
+        'RefreshToken': 'refreshToken', // Replace with your actual refresh token
+      },
+    })
+      .then(response => response.json())
+      .then(data => {
+        // do nothing
+      })
+      .catch(error => {
+        console.error('Error refreshing data:', error);
+      });
+  };
+
     const currentimeTest = () => {
         let currentTime = new Date();
         return<>{currentTime.toISOString()}</>
@@ -440,8 +462,10 @@ const TicketList3 = () => {
             
             <h2 style={styles.title}>Ticketing System Administrator Mode</h2>
             <div style={styles.buttonsTopLeft}>
-                <Button style={{ marginRight: '15px' }} type="primary" onClick={handleExportCsv}>Export CSV</Button>
-                <Button type="primary" onClick={handleSaveAllClick}>Save All</Button>
+                <Button style={{ marginRight: '15px' }} type="primary" onClick={handleExportCsv}>Export Data As CSV</Button>
+                <Button style={{ marginRight: '15px' }}type="primary" onClick={handleSaveAllClick}>Save All Changes</Button>
+                <Button type="primary" onClick={handleRefreshClick}>Refresh Serving Customer Page</Button>
+
                 <div style={{ marginTop: '10px' }}>
                     <Checkbox checked={showDoneItems} onChange={() => setShowDoneItems(!showDoneItems)}>
                         Show Done Items
@@ -453,7 +477,7 @@ const TicketList3 = () => {
                 columns={columns}
                 rowKey="id"
             />
-            {currentimeTest()}
+            {/* {currentimeTest()} */}
             <ToastContainer />
         </div>
     );
@@ -461,7 +485,7 @@ const TicketList3 = () => {
 
 const styles = {
     container: {
-        padding: '30px'
+        padding: '90px'
     },
     title: {
         textAlign: 'center'

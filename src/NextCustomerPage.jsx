@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import DvdLogo from './FoodIcon';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import wavFile from './next.mp3';
 
 const NextCustomerPage = () => {
   // Assuming you have the customer number stored in a variable
@@ -14,6 +15,34 @@ const NextCustomerPage = () => {
   useEffect(() => {
     // Fetch data from the endpoint
     fetchNextTicket()
+  }, []);
+
+  useEffect(() => {
+    // Fetch data from the endpoint
+    console.log("creating SSE")
+    // Set up the SSE connection to listen for updates
+    const eventSource = new EventSource('http://' + window.location.hostname + ':8888/sse/tickets');
+    // Open a connection to the SSE endpoint
+
+    eventSource.addEventListener('refresh', (event) => {
+      try {
+        const incomingData = JSON.parse(event.data);
+        console.log("Refresh Heard", incomingData);
+        console.log(" incomingData.refreshToken",   incomingData.refreshtoken);
+        console.log(" incomingData.refreshToken == 'refreshToken'",   incomingData.refreshtoken == 'refreshToken');
+
+        if(incomingData && incomingData.refreshtoken == 'refreshToken'){
+          console.log("should refresh bc ncomingData.refreshToken: ", incomingData.refreshToken);
+          window.location.reload();
+        }
+      } catch (error) {
+        console.error('Failed to parse JSON data:', error, 'Raw data:', event.data);
+      }
+    });
+
+    return () => {
+      eventSource.close(); // Close the SSE connection when the component unmounts
+    };
   }, []);
 
   function generateUniqueSessionId() {
@@ -54,7 +83,7 @@ const NextCustomerPage = () => {
             new Date(item.scheduleAppointmentTime) >= currentTime &&
             new Date(item.scheduleAppointmentTime) < currentTimePlus45Mins
           ) {
-                        console.log("TYLER :: SPECIAL CASE isBetween11And1130", item)
+            console.log("TYLER :: SPECIAL CASE isBetween11And1130", item)
 
             within30Mins.push(item);
           }
@@ -67,12 +96,12 @@ const NextCustomerPage = () => {
           ) {
             console.log("TYLER:: Within 30")
             console.log("TYLER:: Schedule Time", new Date(item.scheduleAppointmentTime))
-            console.log("TYLER:: Current time - 30", new Date(currentTimeMinusThirty.getTime() - 30 * 60 * 1000))  
+            console.log("TYLER:: Current time - 30", new Date(currentTimeMinusThirty.getTime() - 30 * 60 * 1000))
             within30Mins.push(item);
           } else {
-              console.log("TYLER:: Outside 30")
-              console.log("TYLER:: new Date(item.scheduleAppointmentTime)", new Date(item.scheduleAppointmentTime))
-              console.log("TYLER:: new Date(currentTime.getTime() - 30 * 60 * 1000)", new Date(currentTime.getTime() - 30 * 60 * 1000))  
+            console.log("TYLER:: Outside 30")
+            console.log("TYLER:: new Date(item.scheduleAppointmentTime)", new Date(item.scheduleAppointmentTime))
+            console.log("TYLER:: new Date(currentTime.getTime() - 30 * 60 * 1000)", new Date(currentTime.getTime() - 30 * 60 * 1000))
             outside30Mins.push(item);
           }
         });
@@ -91,13 +120,13 @@ const NextCustomerPage = () => {
         ))
 
         outside30Mins.sort((a, b) => a.positionInLine - b.positionInLine);
-        
+
         console.log("Outsite 30 mins:")
-        
+
         outside30Mins.map(item => (
           console.log("Tyler:", item)
         ))
-        
+
         console.log("within30Mins[0]", within30Mins)
 
         if (within30Mins.length !== 0) {
@@ -106,7 +135,7 @@ const NextCustomerPage = () => {
         } else if (outside30Mins.length !== 0) {
           console.log("outside30Min", outside30Mins)
           setCurrentTicket(outside30Mins[0]);
-        } else{
+        } else {
           setCurrentTicket(null)
         }
 
@@ -218,6 +247,8 @@ const NextCustomerPage = () => {
             .then((response) => response.json())
             .then(() => {
               fetchNextTicket(); // Fetch the next ticket after updating the current one
+              const audio = new Audio(wavFile);
+              audio.play();
             })
             .catch((error) => console.error('Error updating ticket:', error));
         }
@@ -237,6 +268,8 @@ const NextCustomerPage = () => {
         Current Time: {new Date().toISOString()}
 
       </div> */}
+            <DvdLogo />
+
       <div style={styles.container}>
         {console.log("Serving Customers!")}
         <h2 style={styles.servingText}>Serving Customer Number</h2>

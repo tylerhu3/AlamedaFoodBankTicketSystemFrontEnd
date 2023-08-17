@@ -150,7 +150,11 @@ fetchLatestTicket();
                         },
                     ]}
                 >
-                    <TimePicker format="hh:mm A" use12Hours minuteStep={30} />
+                    <TimePicker
+                    
+                    // defaultValue={dayjs(`${defaultTime.getHours()}:00:00`, "HH:mm:ss")}
+                    changeOnBlur={true}
+                    format="hh:mm A" use12Hours minuteStep={30} />
                 </Form.Item>
             )}
 
