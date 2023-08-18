@@ -145,6 +145,30 @@ const NextCustomerPage = () => {
       });
   };
 
+    const handleTap = (e) => {
+      e.preventDefault();
+      if (currentTicket) {
+        console.log("number tapped pressed")
+        const updatedTicket = { ...currentTicket, done: true };
+        // Update the ticket data on the backend using the PUT request
+        fetch(`http://${window.location.hostname}:8888/tickets/${currentTicket.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Session-Id': sessionId // Include the session ID as a custom header
+          },
+          body: JSON.stringify(updatedTicket),
+        })
+          .then((response) => response.json())
+          .then(() => {
+            fetchNextTicket(); // Fetch the next ticket after updating the current one
+            const audio = new Audio(wavFile);
+            audio.play();
+          })
+          .catch((error) => console.error('Error updating ticket:', error));
+      }
+    };
+
   const isCurrentTimeBetween11And1130 = () => {
     // Create a Date object for the current time
     var currentTime = new Date();
@@ -273,7 +297,7 @@ const NextCustomerPage = () => {
       <div style={styles.container}>
         {console.log("Serving Customers!")}
         <h2 style={styles.servingText}>Serving Customer Number</h2>
-        <h1 style={styles.customerNumber}>{(currentTicket != null && currentTicket.positionInLine != null) ? currentTicket.positionInLine : "☺️"}</h1>
+        <h1 onClick={handleTap} style={styles.customerNumber}>{(currentTicket != null && currentTicket.positionInLine != null) ? currentTicket.positionInLine : "☺️"}</h1>
         {currentTicket && currentTicket.firstName != null && (
           <h2 style={styles.positionInLine}>You are up: {currentTicket.firstName} {currentTicket.lastName.charAt(0)}.</h2>
         )}
