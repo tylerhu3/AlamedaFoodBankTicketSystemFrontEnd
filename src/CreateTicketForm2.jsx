@@ -168,7 +168,7 @@ fetchLatestTicket();
             {
                 <Modal
                     visible={isDialogVisible}
-                    title={`Please take a seat ${latestTicket ? latestTicket.firstName : ''}`}
+                    title={`Please take a seat`}
                     //+ (latestTicket != null  && latestTicket.firstName != null) ? latestTicket.firstName : ''
                     onCancel={handleDialogOk}
                     footer={[
@@ -176,8 +176,11 @@ fetchLatestTicket();
                             Ok
                         </Button>,
                     ]}
-                >
-                    <p>Your Position in Line is {latestTicket ? latestTicket.positionInLine : ''}</p>
+                >   
+
+                    <p>{latestTicket ? latestTicket.firstName : ''} {latestTicket ? latestTicket.lastName : ''} </p>
+                    <p>{(latestTicket && latestTicket.scheduleAppointment) ? new Date(latestTicket.scheduleAppointmentTime).toLocaleTimeString()  : ""} </p>
+                    <p>#{latestTicket ? latestTicket.positionInLine : ''}</p>
 
                 </Modal>
 
