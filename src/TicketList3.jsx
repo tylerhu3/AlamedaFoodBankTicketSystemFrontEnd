@@ -351,7 +351,7 @@ const TicketList3 = () => {
             dataIndex: 'time',
             key: 'time',
             render: (text, record) => (
-                <span>{new Date(record.time).toLocaleString()}</span>
+                <span>{ getDateInPacTime(record.time)}</span>
             ),
             onHeaderCell: () => ({
                 onClick: () => sortTickets('time'),
@@ -364,7 +364,7 @@ const TicketList3 = () => {
             render: (text, record) => (
                 <span>
                     {record.scheduleAppointmentTime
-                        ? new Date(record.scheduleAppointmentTime).toLocaleString()
+                        ? getDateInPacTime(record.scheduleAppointmentTime)
                         : 'N/A'}
                 </span>
             ),
@@ -456,6 +456,14 @@ const TicketList3 = () => {
         let currentTime = new Date();
         return<>{currentTime.toISOString()}</>
     }
+
+    const getDateInPacTime = (newDate) => {
+      let dateStr = newDate + "Z"; // Adding 'Z' to indicate it's UTC
+      const dateObj = new Date(dateStr);
+      const pacificDateTime = dateObj.toLocaleString('en-US', { timeZone: 'America/Los_Angeles', hour12: true });
+
+    return <>{pacificDateTime}</>;
+    };
 
     return (
         <div style={styles.container}>
