@@ -437,7 +437,7 @@ const TicketList3 = () => {
 
       const handleRefreshClick = () => {
     // Send a request to the backend with the "RefreshToken" header
-    fetch('http://localhost:8888/refresh', {
+    fetch('http://${window.location.hostname}:8888/refresh', {
       method: 'GET',
       headers: {
         'RefreshToken': 'refreshToken', // Replace with your actual refresh token
