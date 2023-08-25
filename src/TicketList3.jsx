@@ -41,7 +41,7 @@ const TicketList3 = () => {
                 showUpdatedDBToast(updateInfo)
             } catch (error) {
                 console.error('Failed to parse JSON data:', error, 'Raw data:', event.data);
-                eventSource.close(); 
+                eventSource.close();
             }
         });
 
@@ -50,7 +50,7 @@ const TicketList3 = () => {
         };
     }, []);
 
-    function showUpdatedDBToast(updateInfo){
+    function showUpdatedDBToast(updateInfo) {
         console.log("Recevived call", updateInfo)
         // Check if the update's session ID matches the current session's ID
 
@@ -252,7 +252,7 @@ const TicketList3 = () => {
     const handleToggleDoneClick = (ticketId) => {
         // Find the ticket to be toggled from the tickets array
         const ticketToToggle = tickets.find((ticket) => ticket.id === ticketId);
-    
+
         // Toggle the "done" value
         const updatedDoneValue = !ticketToToggle.done;
         ticketToToggle.done = !ticketToToggle.done;
@@ -279,7 +279,7 @@ const TicketList3 = () => {
                 message.error('An error occurred while updating the ticket status. Please try again.'); // Show error toast message
             });
     };
-    
+
 
     const columns = [
         {
@@ -351,7 +351,7 @@ const TicketList3 = () => {
             dataIndex: 'time',
             key: 'time',
             render: (text, record) => (
-                <span>{ getDateInPacTime(record.time)}</span>
+                <span>{getDateInPacTime(record.time)}</span>
             ),
             onHeaderCell: () => ({
                 onClick: () => sortTickets('time'),
@@ -407,12 +407,12 @@ const TicketList3 = () => {
             dataIndex: 'done',
             key: 'done',
             render: (text, record) => (
-                <Button 
-                onClick={() => handleToggleDoneClick(record.id)}
-                style={{
-                    backgroundColor: record.done ? 'green' : 'red',
-                    color: 'white',
-                }}
+                <Button
+                    onClick={() => handleToggleDoneClick(record.id)}
+                    style={{
+                        backgroundColor: record.done ? 'green' : 'red',
+                        color: 'white',
+                    }}
                 >{record.done ? 'Done' : 'Not Done'}</Button>
             ),
             onHeaderCell: () => ({
@@ -435,43 +435,47 @@ const TicketList3 = () => {
         },
     ];
 
-      const handleRefreshClick = () => {
-    // Send a request to the backend with the "RefreshToken" header
-    fetch('http://${window.location.hostname}:8888/refresh', {
-      method: 'GET',
-      headers: {
-        'RefreshToken': 'refreshToken', // Replace with your actual refresh token
-      },
-    })
-      .then(response => response.json())
-      .then(data => {
-        // do nothing
-      })
-      .catch(error => {
-        console.error('Error refreshing data:', error);
-      });
-  };
+    const handleRefreshClick = () => {
+        console.log("refresh clicked")
+
+        // Send a request to the backend with the "RefreshToken" header
+        //         fetch('http://' + window.location.hostname + ':8888/tickets')
+
+        fetch('http://' + window.location.hostname + ':8888/refresh', {
+            method: 'GET',
+            headers: {
+                'RefreshToken': 'refreshToken', // Replace with your actual refresh token
+            },
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log("refresh Succes")
+            })
+            .catch(error => {
+                console.error('Error refreshing data:', error);
+            });
+    };
 
     const currentimeTest = () => {
         let currentTime = new Date();
-        return<>{currentTime.toISOString()}</>
+        return <>{currentTime.toISOString()}</>
     }
 
     const getDateInPacTime = (newDate) => {
-      let dateStr = newDate + "Z"; // Adding 'Z' to indicate it's UTC
-      const dateObj = new Date(dateStr);
-      const pacificDateTime = dateObj.toLocaleString('en-US', { timeZone: 'America/Los_Angeles', hour12: true });
+        let dateStr = newDate + "Z"; // Adding 'Z' to indicate it's UTC
+        const dateObj = new Date(dateStr);
+        const pacificDateTime = dateObj.toLocaleString('en-US', { timeZone: 'America/Los_Angeles', hour12: true });
 
-    return <>{pacificDateTime}</>;
+        return <>{pacificDateTime}</>;
     };
 
     return (
         <div style={styles.container}>
-            
+
             <h2 style={styles.title}>Ticketing System Administrator Mode</h2>
             <div style={styles.buttonsTopLeft}>
                 <Button style={{ marginRight: '15px' }} type="primary" onClick={handleExportCsv}>Export Data As CSV</Button>
-                <Button style={{ marginRight: '15px' }}type="primary" onClick={handleSaveAllClick}>Save All Changes</Button>
+                <Button style={{ marginRight: '15px' }} type="primary" onClick={handleSaveAllClick}>Save All Changes</Button>
                 <Button type="primary" onClick={handleRefreshClick}>Refresh Serving Customer Page</Button>
 
                 <div style={{ marginTop: '10px' }}>

@@ -1,7 +1,6 @@
 // NextCustomerPage.js
 import React, { useEffect, useRef, useState } from 'react';
 import DvdLogo from './FoodIcon';
-import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import wavFile from './next.mp3';
 
@@ -10,7 +9,7 @@ const NextCustomerPage = () => {
   // const [data, setData] = useState([]);
   const [currentTicket, setCurrentTicket] = useState(null);
   const [sessionId, setSessionId] = useState(generateUniqueSessionId());
-  const isToastVisibleRef = useRef(false);
+  const [doneTickets, setDoneTickets] = useState([]);
 
   useEffect(() => {
     // Fetch data from the endpoint
@@ -28,12 +27,12 @@ const NextCustomerPage = () => {
       try {
         const incomingData = JSON.parse(event.data);
         console.log("Refresh Heard", incomingData);
-        console.log(" incomingData.refreshToken",   incomingData.refreshtoken);
-        console.log(" incomingData.refreshToken == 'refreshToken'",   incomingData.refreshtoken == 'refreshToken');
+        console.log(" incomingData.refreshToken", incomingData.refreshtoken);
+        console.log(" incomingData.refreshToken == 'refreshToken'", incomingData.refreshtoken == 'refreshToken');
 
-        if(incomingData && incomingData.refreshtoken == 'refreshToken'){
+        if (incomingData && incomingData.refreshtoken == 'refreshToken') {
           console.log("should refresh bc ncomingData.refreshToken: ", incomingData.refreshToken);
-          window.location.reload();
+          fetchNextTicket()
         }
       } catch (error) {
         console.error('Failed to parse JSON data:', error, 'Raw data:', event.data);
@@ -57,6 +56,15 @@ const NextCustomerPage = () => {
     fetch('http://' + window.location.hostname + ':8888/tickets/not-done-from-last-12-hours')
       .then(response => response.json())
       .then(incomingData => {
+        console.log("incomingData: ", incomingData)
+        console.log("incomingData.length: ", incomingData.length)
+
+        if (incomingData.length == null) {
+          console.log("incomingData is null")
+          setCurrentTicket(null)
+          return;
+        }
+
         const currentISO = new Date().toISOString().slice(0, 16); // Current time
         let currentTime = new Date(currentISO);
         let currentTimeMinusThirty = new Date(currentTime.getTime() - 30 * 60 * 1000);
@@ -145,29 +153,32 @@ const NextCustomerPage = () => {
       });
   };
 
-    const handleTap = (e) => {
-      e.preventDefault();
-      if (currentTicket) {
-        console.log("number tapped pressed")
-        const updatedTicket = { ...currentTicket, done: true };
-        // Update the ticket data on the backend using the PUT request
-        fetch(`http://${window.location.hostname}:8888/tickets/${currentTicket.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Session-Id': sessionId // Include the session ID as a custom header
-          },
-          body: JSON.stringify(updatedTicket),
+  const handleTap = (e) => {
+    e.preventDefault();
+    if (currentTicket) {
+      console.log("number tapped pressed")
+      const updatedTicket = { ...currentTicket, done: true };
+      // Update the ticket data on the backend using the PUT request
+      fetch(`http://${window.location.hostname}:8888/tickets/${currentTicket.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Session-Id': sessionId // Include the session ID as a custom header
+        },
+        body: JSON.stringify(updatedTicket),
+      })
+        .then((response) => response.json())
+        .then(() => {
+          setDoneTickets(prevDoneTickets => [...prevDoneTickets, currentTicket]);
+          fetchNextTicket(); // Fetch the next ticket after updating the current one
+          const audio = new Audio(wavFile);
+          audio.play();
         })
-          .then((response) => response.json())
-          .then(() => {
-            fetchNextTicket(); // Fetch the next ticket after updating the current one
-            const audio = new Audio(wavFile);
-            audio.play();
-          })
-          .catch((error) => console.error('Error updating ticket:', error));
-      }
-    };
+        .catch((error) => {
+          console.error('Error updating ticket:', error);
+        });
+    }
+  };
 
   const isCurrentTimeBetween11And1130 = () => {
     // Create a Date object for the current time
@@ -197,64 +208,10 @@ const NextCustomerPage = () => {
       return false
     }
   }
-  // useEffect(() => {
-
-  //   // Set up the SSE connection to listen for updates
-  //   const eventSource = new EventSource('http://' + window.location.hostname + ':8888/sse/tickets');
-  //   // Open a connection to the SSE endpoint
-
-  //   eventSource.addEventListener('update', (event) => {
-
-  //     try {
-  //       const updateInfo = JSON.parse(event.data);
-  //       // Handle updates and show the toast message
-  //       // You can customize the toast content, appearance, and behavior
-  //       console.log("Recevived call", updateInfo)
-  //       // Check if the update's session ID matches the current session's ID
-
-  //       console.log("updateInfo.sessionId", updateInfo.sessionId)
-  //       console.log("sessionId", sessionId)
-  //       console.log("isToastVisibleRef", isToastVisibleRef)
-
-  //       if (isToastVisibleRef.current == false && updateInfo.sessionId !== sessionId) {
-  //         window.location.reload()
-  //       }
-
-  //       // if (isToastVisibleRef.current == false && updateInfo.sessionId !== sessionId) {
-  //       //     console.log("Session Id different")
-  //       //     isToastVisibleRef.current = true; // Update the ref to true
-  //       //     console.log("isToastVisible: ", isToastVisibleRef)
-  //       //     const toastId = toast('Database has been updated. Click Here to reload. ', {
-  //       //         position: "top-right",
-  //       //         autoClose: false,
-  //       //         closeOnClick: true,
-  //       //         pauseOnHover: true,
-  //       //         draggable: true,
-  //       //         progress: undefined,
-  //       //         onClick: () => window.location.reload() // Reload the page when the toast is clicked
-  //       //         // You can add a button to refresh the page
-  //       //     });
-
-  //       //     // Set up a callback to be called when the toast is dismissed
-  //       //     toast.onChange(() => {
-  //       //         if (!toast.isActive(toastId)) {
-  //       //             isToastVisibleRef.current = false;
-  //       //         }
-  //       //     });
-
-  //       // }
-  //     } catch (error) {
-  //       console.error('Failed to parse JSON data:', error, 'Raw data:', event.data);
-  //     }
-  //   });
-
-  //   return () => {
-  //     eventSource.close(); // Close the SSE connection when the component unmounts
-  //   };
-  // }, []);
 
   useEffect(() => {
     const handleKeyPress = (event) => {
+      console.log("111 event.keyCode: ", event.keyCode);
       if (event.key === ' ') {
         if (currentTicket) {
           console.log("space pressed")
@@ -270,12 +227,15 @@ const NextCustomerPage = () => {
           })
             .then((response) => response.json())
             .then(() => {
+              setDoneTickets(prevDoneTickets => [...prevDoneTickets, currentTicket]);
               fetchNextTicket(); // Fetch the next ticket after updating the current one
               const audio = new Audio(wavFile);
               audio.play();
             })
             .catch((error) => console.error('Error updating ticket:', error));
         }
+      } else if (event.keyCode === 120) {
+        undoTicketChange()
       }
     };
 
@@ -286,13 +246,53 @@ const NextCustomerPage = () => {
     };
   }, [currentTicket]);
 
-  return (
-    <div>
-      {/* <div>
-        Current Time: {new Date().toISOString()}
+  const undoTicketChange = () => {
+    if (doneTickets.length === 0) {
+      console.log("no doneTickets")
+      return;  // No ticket to revert
+    }
 
-      </div> */}
-            <DvdLogo />
+    console.log("doneTickets", doneTickets)
+    const lastDoneTicket = doneTickets[doneTickets.length - 1];
+    console.log("last done ticket:", lastDoneTicket)
+    const updatedTicket = { ...lastDoneTicket, done: false };
+
+    fetch(`http://${window.location.hostname}:8888/tickets/${lastDoneTicket.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Session-Id': sessionId // Include the session ID as a custom header
+      },
+      body: JSON.stringify(updatedTicket),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Error reverting ticket update. Please try again.");
+        }
+        return response.json();
+      })
+      .then(data => {
+        // Handle success logic if any
+        // Remove the last ticket from the doneTickets state
+        setDoneTickets(prevDoneTickets => prevDoneTickets.slice(0, -1));
+        fetchNextTicket();
+      })
+      .catch(error => {
+        console.error('Error reverting ticket update:', error);
+      });
+  };
+
+  useEffect(() => {
+    // Update the document title using the browser API
+    { console.log("doneTickets: ", doneTickets) }
+  });
+
+  return (
+
+    <div>
+      <div onClick={undoTicketChange}>
+        <DvdLogo/>
+      </div>
 
       <div style={styles.container}>
         {console.log("Serving Customers!")}
@@ -302,7 +302,6 @@ const NextCustomerPage = () => {
           <h2 style={styles.positionInLine}>You are up: {currentTicket.firstName} {currentTicket.lastName.charAt(0)}.</h2>
         )}
       </div>
-      <ToastContainer />
 
     </div>
   );
