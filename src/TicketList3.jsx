@@ -456,14 +456,9 @@ const TicketList3 = () => {
             });
     };
 
-    const currentimeTest = () => {
-        let currentTime = new Date();
-        return <>{currentTime.toISOString()}</>
-    }
 
     const getDateInPacTime = (newDate) => {
-        let dateStr = newDate + "Z"; // Adding 'Z' to indicate it's UTC
-        const dateObj = new Date(dateStr);
+        const dateObj = new Date(newDate);
         const pacificDateTime = dateObj.toLocaleString('en-US', { timeZone: 'America/Los_Angeles', hour12: true });
 
         return <>{pacificDateTime}</>;

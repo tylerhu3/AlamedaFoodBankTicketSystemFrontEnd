@@ -10,6 +10,12 @@ const NextCustomerPage = () => {
   const [currentTicket, setCurrentTicket] = useState(null);
   const [sessionId, setSessionId] = useState(generateUniqueSessionId());
   const [doneTickets, setDoneTickets] = useState([]);
+  
+  // Define the start and end times for the range (11:00 AM to 11:30 AM)
+  var startTimeHours = 11;
+  var startTimeMinutes = 0;
+  var endTimeHours = 11;
+  var endTimeMinutes = 30;
 
   useEffect(() => {
     // Fetch data from the endpoint
@@ -65,8 +71,8 @@ const NextCustomerPage = () => {
           return;
         }
 
-        const currentISO = new Date().toISOString().slice(0, 16); // Current time
-        let currentTime = new Date(currentISO);
+      
+        let currentTime = new Date();
         let currentTimeMinusThirty = new Date(currentTime.getTime() - 30 * 60 * 1000);
 
         let currentTimePlus45Mins = new Date(currentTime.getTime() + 45 * 60 * 1000);
@@ -77,8 +83,9 @@ const NextCustomerPage = () => {
         incomingData.forEach(item => {
           // Insert code to also check if time is 11 to 1130 
           // and then check if we have appointments from within the next 30 minutes ? 
-          const isBetween11And1130 = isCurrentTimeBetween11And1130();
+          const isBetween11And1130 = isCurrentTimeBetweenXandY();
           console.log(`TYLER:: DEBUG
+          new Date(): ${new Date().toLocaleDateString()}
           isBetween11And1130: ${isBetween11And1130}
           item.scheduleAppointmentTime: ${item.scheduleAppointmentTime} 
           new Date(item.scheduleAppointmentTime): ${new Date(item.scheduleAppointmentTime)} 
@@ -110,6 +117,7 @@ const NextCustomerPage = () => {
             console.log("TYLER:: Outside 30")
             console.log("TYLER:: new Date(item.scheduleAppointmentTime)", new Date(item.scheduleAppointmentTime))
             console.log("TYLER:: new Date(currentTime.getTime() - 30 * 60 * 1000)", new Date(currentTime.getTime() - 30 * 60 * 1000))
+            console.log("TYLER:: new Date(new Date().getTime() - 30 * 60 * 10000)", new Date(new Date().getTime() - 30 * 60 * 1000))
             outside30Mins.push(item);
           }
         });
@@ -180,7 +188,7 @@ const NextCustomerPage = () => {
     }
   };
 
-  const isCurrentTimeBetween11And1130 = () => {
+  const isCurrentTimeBetweenXandY = () => {
     // Create a Date object for the current time
     var currentTime = new Date();
 
@@ -189,12 +197,6 @@ const NextCustomerPage = () => {
     // Get the current hours and minutes
     var currentHours = currentTime.getHours();
     var currentMinutes = currentTime.getMinutes();
-
-    // Define the start and end times for the range (11:00 AM to 11:30 AM)
-    var startTimeHours = 11;
-    var startTimeMinutes = 0;
-    var endTimeHours = 11;
-    var endTimeMinutes = 30;
 
     // Compare the current time with the desired range
     if (
@@ -233,6 +235,8 @@ const NextCustomerPage = () => {
               audio.play();
             })
             .catch((error) => console.error('Error updating ticket:', error));
+        }else{
+          fetchNextTicket();
         }
       } else if (event.keyCode === 120) {
         undoTicketChange()

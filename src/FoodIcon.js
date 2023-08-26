@@ -22,8 +22,8 @@ const DvdLogo = () => {
 
     let x = 0;
     let y = 0;
-    let xVelocity = 3;
-    let yVelocity = 3;
+    let xVelocity = 2;
+    let yVelocity = 2;
 
     const animate = () => {
       const logoPosition = dvdLogo.getBoundingClientRect();
