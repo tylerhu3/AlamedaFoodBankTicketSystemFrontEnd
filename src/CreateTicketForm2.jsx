@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Form, Input, Checkbox, Button, Modal, Select } from 'antd';
+import { Form, Input, Checkbox, Button, Modal, Select, message } from 'antd';
 import moment from 'moment';
 
 const { Option } = Select;
@@ -10,11 +10,13 @@ const CreateTicketForm2 = () => {
     const [isDialogVisible, setDialogVisible] = useState(false); // State to manage dialog visibility
     const [showTimePicker, setShowTimePicker] = useState(false); // State for showing TimePicker
     const [selectedTime, setSelectedTime] = useState(getCurrentTimeSlot());
+    const [isLoading, setIsLoading] = useState(false);
 
     // Generate the time slots
     const generateTimeSlots = () => {
         const times = [];
-        for (let i = 0; i <= 19; i++) { // Loop from 11 to 19 (11AM to 7PM)
+        for (let i = 11; i <= 19; i++) { // Loop from 11 to 19 (11AM to 7PM)
+            if (i != 11)
             times.push(`${i <= 12 ? i : i - 12}:00 ${i < 12 ? 'AM' : 'PM'}`);
             times.push(`${i <= 12 ? i : i - 12}:30 ${i < 12 ? 'AM' : 'PM'}`);
         }
@@ -96,6 +98,8 @@ const CreateTicketForm2 = () => {
 
     const handleSubmit = (values) => {
         // Create a new ticket with the current time
+        setIsLoading(true); // Set loading status to true at the start of submission
+
         const currentTime = new Date().toLocaleTimeString();
         
         // Get the selected time from TimePicker
@@ -139,6 +143,7 @@ const CreateTicketForm2 = () => {
         })
             .then((response) => response.json())
             .then((data) => {
+                setIsLoading(false);  // Set loading status to false if there's an error
                 // Fetch tickets data again to get the total number of tickets (including the newly created one)
                 fetch("http://" + window.location.hostname + ":8888/tickets")
                     .then((response) => response.json())
@@ -152,9 +157,19 @@ const CreateTicketForm2 = () => {
                         // Hide Appointment time picker
                         setShowTimePicker(false);
                     })
-                    .catch((error) => console.error("Error fetching tickets:", error));
+                    .catch((error) => {
+                        console.error("Error fetching tickets:", error);
+                        setIsLoading(false);  // Set loading status to false if there's an error
+                        message.error('Error creating ticket. Please try again later.');  // Display error message
+
+                    });
             })
-            .catch((error) => console.error("Error creating ticket:", error));
+            .catch((error) => {
+                console.error("Error creating ticket:", error);
+                setIsLoading(false);  // Set loading status to false if there's an error
+                message.error('Error creating ticket. Please try again later.');  // Display error message
+
+            });
     };
 
     return (
@@ -228,7 +243,7 @@ const CreateTicketForm2 = () => {
                         initialValue={selectedTime}
                     >
                         <Select
-                            style={{ width: "max-content" }}
+                            style={{ width: "140" }}
                             dropdownMatchSelectWidth={false}
                             value={selectedTime}
                             onChange={(value) => setSelectedTime(value)}
@@ -243,7 +258,7 @@ const CreateTicketForm2 = () => {
                 )}
 
                 <Form.Item>
-                    <Button type="primary" htmlType="submit">
+                <Button type="primary" htmlType="submit" loading={isLoading} disabled={isLoading}>
                         Create Ticket
                     </Button>
                 </Form.Item>
