@@ -66,6 +66,7 @@ const styles = {
     width: '80px',
     height: '80px',
     borderRadius: '50%',
+    zIndex: 99, // Make sure it's above other content
   },
   icon: {
     color: 'white',

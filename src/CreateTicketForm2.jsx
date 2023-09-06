@@ -231,7 +231,7 @@ const CreateTicketForm2 = () => {
                             setShowTimePicker(e.target.checked);
                         }}
                     >
-                        Schedule Appointment
+                        Has Schedule Appointment
                     </Checkbox>
                 </Form.Item>
 

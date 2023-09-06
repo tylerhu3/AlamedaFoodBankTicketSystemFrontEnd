@@ -1,0 +1,17 @@
+.container {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+  }
+  
+  .section {
+    flex: 1;          /* This allows each section to take up equal space */
+    border: 1px solid #ccc;
+    padding: 20px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  .section h2 {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+  }

@@ -3,14 +3,18 @@ import React, { useEffect, useRef, useState } from 'react';
 import DvdLogo from './FoodIcon';
 import 'react-toastify/dist/ReactToastify.css';
 import wavFile from './next.mp3';
+import './nextCustomerPage.css';  // Import the CSS
+import { Drawer, Button } from 'antd';
 
 const NextCustomerPage = () => {
   // Assuming you have the customer number stored in a variable
   // const [data, setData] = useState([]);
   const [currentTicket, setCurrentTicket] = useState(null);
   const [sessionId, setSessionId] = useState(generateUniqueSessionId());
-  const [doneTickets, setDoneTickets] = useState([]);
-  
+  const [servedCustomers, setServedCustomers] = useState([]);
+  const [loading, setLoading] = useState(false); // Initialize loading state
+  const [waitingCustomers, setWaitingCustomers] = useState([]);
+
   // Define the start and end times for the range (11:00 AM to 11:30 AM)
   var startTimeHours = 11;
   var startTimeMinutes = 0;
@@ -71,7 +75,7 @@ const NextCustomerPage = () => {
           return;
         }
 
-      
+
         let currentTime = new Date();
         let currentTimeMinusThirty = new Date(currentTime.getTime() - 30 * 60 * 1000);
 
@@ -154,6 +158,16 @@ const NextCustomerPage = () => {
         } else {
           setCurrentTicket(null)
         }
+        // Merge the arrays
+        const mergedArray = [...within30Mins, ...outside30Mins];
+
+        // Check the length and remove the first element if necessary
+        if (mergedArray.length > 0) {
+          mergedArray.shift();
+          setWaitingCustomers(mergedArray);
+
+        }
+
 
       })
       .catch(error => {
@@ -177,7 +191,7 @@ const NextCustomerPage = () => {
       })
         .then((response) => response.json())
         .then(() => {
-          setDoneTickets(prevDoneTickets => [...prevDoneTickets, currentTicket]);
+          setServedCustomers(prevDoneTickets => [...prevDoneTickets, currentTicket]);
           fetchNextTicket(); // Fetch the next ticket after updating the current one
           const audio = new Audio(wavFile);
           audio.play();
@@ -213,9 +227,13 @@ const NextCustomerPage = () => {
 
   useEffect(() => {
     const handleKeyPress = (event) => {
+
       console.log("111 event.keyCode: ", event.keyCode);
+      if (loading != false)
+        return;
       if (event.key === ' ') {
         if (currentTicket) {
+          setLoading(true);
           console.log("space pressed")
           const updatedTicket = { ...currentTicket, done: true };
           // Update the ticket data on the backend using the PUT request
@@ -229,13 +247,16 @@ const NextCustomerPage = () => {
           })
             .then((response) => response.json())
             .then(() => {
-              setDoneTickets(prevDoneTickets => [...prevDoneTickets, currentTicket]);
+              setServedCustomers(prevDoneTickets => [...prevDoneTickets, currentTicket]);
               fetchNextTicket(); // Fetch the next ticket after updating the current one
               const audio = new Audio(wavFile);
               audio.play();
             })
-            .catch((error) => console.error('Error updating ticket:', error));
-        }else{
+            .catch((error) => console.error('Error updating ticket:', error))
+            .finally(() => {
+              setLoading(false);  // Stop loading after API call completes
+            });
+        } else {
           fetchNextTicket();
         }
       } else if (event.keyCode === 120) {
@@ -251,16 +272,15 @@ const NextCustomerPage = () => {
   }, [currentTicket]);
 
   const undoTicketChange = () => {
-    if (doneTickets.length === 0) {
+    if (servedCustomers.length === 0) {
       console.log("no doneTickets")
       return;  // No ticket to revert
     }
-
-    console.log("doneTickets", doneTickets)
-    const lastDoneTicket = doneTickets[doneTickets.length - 1];
+    console.log("doneTickets", servedCustomers)
+    const lastDoneTicket = servedCustomers[servedCustomers.length - 1];
     console.log("last done ticket:", lastDoneTicket)
     const updatedTicket = { ...lastDoneTicket, done: false };
-
+    setLoading(true);
     fetch(`http://${window.location.hostname}:8888/tickets/${lastDoneTicket.id}`, {
       method: 'PUT',
       headers: {
@@ -278,26 +298,58 @@ const NextCustomerPage = () => {
       .then(data => {
         // Handle success logic if any
         // Remove the last ticket from the doneTickets state
-        setDoneTickets(prevDoneTickets => prevDoneTickets.slice(0, -1));
+        setServedCustomers(prevDoneTickets => prevDoneTickets.slice(0, -1));
         fetchNextTicket();
       })
       .catch(error => {
         console.error('Error reverting ticket update:', error);
+      })
+      .finally(() => {
+        setLoading(false);  // Stop loading after undo action completes
       });
   };
 
   useEffect(() => {
     // Update the document title using the browser API
-    { console.log("doneTickets: ", doneTickets) }
+    { console.log("doneTickets: ", servedCustomers) }
   });
+
+  const getDateInPacTime = (newDate) => {
+    console.log("TYLER::getDateInPacTime", getDateInPacTime)
+    const dateObj = new Date(newDate);
+    const pacificDateTime = dateObj.toLocaleString('en-US', {
+      timeZone: 'America/Los_Angeles', hour12: true, hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    return <>{pacificDateTime}</>;
+  };
 
   return (
 
     <div>
-      <div onClick={undoTicketChange}>
-        <DvdLogo/>
+      {/* Floating Div */}
+      <div style={styles.floatingDivLeft}>
+        
+        <h5>Unserved Customers:</h5>
+      <div style={styles.scrollableContainer}>
+          {waitingCustomers.map((customer, index) => (
+            <div key={index}>{customer.positionInLine} {customer.firstName} {customer.lastName.charAt(0)} {customer.scheduleAppointmentTime != null ? getDateInPacTime(customer.scheduleAppointmentTime) : ""}</div>
+          ))}
+        </div>
       </div>
+      <div style={styles.floatingDivRight}>
+<h5>Served Customers:</h5>
+        <div style={styles.scrollableContainer}>
+          {servedCustomers.map((customer, index) => (
+            <div key={index}>{customer.positionInLine} {customer.firstName} {customer.lastName.charAt(0)} {customer.scheduleAppointmentTime != null ? getDateInPacTime(customer.scheduleAppointmentTime) : ""}</div>
+          ))}
+        </div>
 
+      </div>
+      <div onClick={undoTicketChange}>
+        <DvdLogo />
+      </div>
       <div style={styles.container}>
         {console.log("Serving Customers!")}
         <h2 style={styles.servingText}>Serving Customer Number</h2>
@@ -321,6 +373,30 @@ const styles = {
     height: '100vh',
     background: '#f0f0f0', // Light gray background
   },
+  
+  floatingDivRight: {
+    position: 'fixed',
+    top: 0,
+    right: 0, // Place the div on the right side
+    width: '20%', // Adjust the width as needed
+    height: '100%', // Adjust the height as needed
+    background: '#fff', // White background
+    boxShadow: '0 0 5px rgba(0, 0, 0, 0.2)', // Shadow for the div
+    padding: '10px', // Add some padding for content
+    zIndex: 1, // Set to a lower value to place it behind the other content
+  },
+
+  floatingDivLeft: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    width: '20%', // Adjust the width as needed
+    height: '100%', // Adjust the height as needed
+    background: '#fff', // White background
+    boxShadow: '0 0 5px rgba(0, 0, 0, 0.2)', // Shadow for the div
+    padding: '10px', // Add some padding for content
+    zIndex: 1, // Make sure it's above other content
+  },
   servingText: {
     fontSize: '24px',
     fontWeight: 'bold',
@@ -334,6 +410,11 @@ const styles = {
     fontFamily: 'Helvetica, Arial, sans-serif', // Apple-like font
     color: '#333', // Dark gray text color
     margin: 0, // Remove margin between elements
+  },
+  // Add a new style for the scrollable container
+  scrollableContainer: {
+    height: '100%', // Set a fixed height
+    overflowY: 'auto', // Add vertical scroll when content overflows
   },
 };
 

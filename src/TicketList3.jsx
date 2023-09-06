@@ -295,7 +295,8 @@ const TicketList3 = () => {
             dataIndex: 'firstName',
             key: 'firstName',
             render: (text, record) => (
-                <Input
+                <Input 
+                style={styles.input}
                     value={record.firstName}
                     onChange={(e) => handleFieldChange(record.id, 'firstName', e.target.value)}
                 />
@@ -310,6 +311,7 @@ const TicketList3 = () => {
             key: 'lastName',
             render: (text, record) => (
                 <Input
+                style={styles.input}
                     value={record.lastName}
                     onChange={(e) => handleFieldChange(record.id, 'lastName', e.target.value)}
                 />
@@ -378,6 +380,7 @@ const TicketList3 = () => {
             key: 'positionInLine',
             render: (text, record) => (
                 <Input
+                style={{width: '50px'}}
                     type="number"
                     value={record.positionInLine}
                     onChange={(e) => handleFieldChange(record.id, 'positionInLine', parseInt(e.target.value))}
@@ -458,7 +461,7 @@ const TicketList3 = () => {
 
 
     const getDateInPacTime = (newDate) => {
-        const dateObj = new Date(newDate);
+        const dateObj = new Date(newDate + "Z");
         const pacificDateTime = dateObj.toLocaleString('en-US', { timeZone: 'America/Los_Angeles', hour12: true });
 
         return <>{pacificDateTime}</>;
@@ -491,6 +494,9 @@ const TicketList3 = () => {
 };
 
 const styles = {
+    input: {
+        width: '200px'
+    },
     container: {
         padding: '90px'
     },
