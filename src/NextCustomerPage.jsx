@@ -16,8 +16,8 @@ const NextCustomerPage = () => {
   const [waitingCustomers, setWaitingCustomers] = useState([]);
 
   // Define the start and end times for the range (11:00 AM to 11:30 AM)
-  var startTimeHours = 11;
-  var startTimeMinutes = 0;
+  var startTimeHours = 10;
+  var startTimeMinutes = 45;
   var endTimeHours = 11;
   var endTimeMinutes = 30;
 
@@ -373,7 +373,7 @@ const styles = {
     height: '100vh',
     background: '#f0f0f0', // Light gray background
   },
-  
+
   floatingDivRight: {
     position: 'fixed',
     top: 0,
