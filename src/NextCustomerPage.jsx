@@ -4,7 +4,6 @@ import DvdLogo from './FoodIcon';
 import 'react-toastify/dist/ReactToastify.css';
 import wavFile from './next.mp3';
 import './nextCustomerPage.css';  // Import the CSS
-import { Drawer, Button } from 'antd';
 
 const NextCustomerPage = () => {
   // Assuming you have the customer number stored in a variable
@@ -17,7 +16,7 @@ const NextCustomerPage = () => {
 
   // Define the start and end times for the range (11:00 AM to 11:30 AM)
   var startTimeHours = 10;
-  var startTimeMinutes = 45;
+  var startTimeMinutes = 30;
   var endTimeHours = 11;
   var endTimeMinutes = 30;
 
@@ -75,7 +74,6 @@ const NextCustomerPage = () => {
           return;
         }
 
-
         let currentTime = new Date();
         let currentTimeMinusThirty = new Date(currentTime.getTime() - 30 * 60 * 1000);
 
@@ -99,11 +97,9 @@ const NextCustomerPage = () => {
 
           if (
             isBetween11And1130 && item.scheduleAppointmentTime &&
-            new Date(item.scheduleAppointmentTime) >= currentTime &&
-            new Date(item.scheduleAppointmentTime) < currentTimePlus45Mins
+            IsTheTime1130(item.scheduleAppointmentTime)
           ) {
             console.log("TYLER :: SPECIAL CASE isBetween11And1130", item)
-
             within30Mins.push(item);
           }
           else if (
@@ -325,13 +321,28 @@ const NextCustomerPage = () => {
     return <>{pacificDateTime}</>;
   };
 
+  const IsTheTime1130 = (newDate) => {
+    console.log("TYLER::getDateInPacTime", getDateInPacTime)
+    const dateObj = new Date(newDate);
+    const pacificDateTime = dateObj.toLocaleString('en-US', {
+      timeZone: 'America/Los_Angeles', hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    console.log("TYLER::1130 Check 2:", pacificDateTime.toString() )
+    console.log("TYLER::1130 Check:  ", pacificDateTime.hour, " ", pacificDateTime.minute, " ", pacificDateTime.toString() == "11:30 AM")
+
+
+    return pacificDateTime.toString() == "11:30 AM"
+  };
+
   return (
 
     <div>
       {/* Floating Div */}
       <div style={styles.floatingDivLeft}>
         
-        <h5>Unserved Customers:</h5>
+        <h5>Unserved Clients:</h5>
       <div style={styles.scrollableContainer}>
           {waitingCustomers.map((customer, index) => (
             <div key={index}>{customer.positionInLine} {customer.firstName} {customer.lastName.charAt(0)} {customer.scheduleAppointmentTime != null ? getDateInPacTime(customer.scheduleAppointmentTime) : ""}</div>
@@ -339,7 +350,7 @@ const NextCustomerPage = () => {
         </div>
       </div>
       <div style={styles.floatingDivRight}>
-<h5>Served Customers:</h5>
+<h5>Served Clients:</h5>
         <div style={styles.scrollableContainer}>
           {servedCustomers.map((customer, index) => (
             <div key={index}>{customer.positionInLine} {customer.firstName} {customer.lastName.charAt(0)} {customer.scheduleAppointmentTime != null ? getDateInPacTime(customer.scheduleAppointmentTime) : ""}</div>
@@ -352,7 +363,7 @@ const NextCustomerPage = () => {
       </div>
       <div style={styles.container}>
         {console.log("Serving Customers!")}
-        <h2 style={styles.servingText}>Serving Customer Number</h2>
+        <h2 style={styles.servingText}>Serving Client Number</h2>
         <h1 onClick={handleTap} style={styles.customerNumber}>{(currentTicket != null && currentTicket.positionInLine != null) ? currentTicket.positionInLine : "☺️"}</h1>
         {currentTicket && currentTicket.firstName != null && (
           <h2 style={styles.positionInLine}>You are up: {currentTicket.firstName} {currentTicket.lastName.charAt(0)}.</h2>

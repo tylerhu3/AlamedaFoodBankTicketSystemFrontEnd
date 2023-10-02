@@ -5,7 +5,7 @@ import { toast } from 'react-toastify'; // Assuming you're using react-toastify 
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const TicketList3 = () => {
+const AdminPage = () => {
     const [tickets, setTickets] = useState([]);
     const [sorting, setSorting] = useState({});
     const [sessionId, _] = useState(generateUniqueSessionId());
@@ -170,10 +170,10 @@ const TicketList3 = () => {
                 ticket.id,
                 ticket.firstName,
                 ticket.lastName,
-                ticket.scheduleAppointment,
-                ticket.scheduleAppointmentTime,
-                ticket.firstTimeVisitor,
-                ticket.time,
+                ticket.scheduleAppointment == 1 ? "Yes": "No",
+                ticket.scheduleAppointmentTime ?  getDateInPacTimeAsString(ticket.scheduleAppointmentTime): "N/A",
+                ticket.firstTimeVisitor == 1 ? "Yes": "No",
+                ticket.time  ?  getDateInPacTimeAsString(ticket.time): "N/A",
                 ticket.positionInLine,
                 ticket.additionalNotes,
                 ticket.done,
@@ -353,7 +353,8 @@ const TicketList3 = () => {
             dataIndex: 'time',
             key: 'time',
             render: (text, record) => (
-                <span>{getDateInPacTime(record.time)}</span>
+                // <span>{record.time? getDateInPacTime(record.time + "Z") : "N/A"}</span>
+                <span>{record.time? getDateInPacTime(record.time) : "N/A"}</span>
             ),
             onHeaderCell: () => ({
                 onClick: () => sortTickets('time'),
@@ -461,10 +462,16 @@ const TicketList3 = () => {
 
 
     const getDateInPacTime = (newDate) => {
-        const dateObj = new Date(newDate + "Z");
+        const dateObj = new Date(newDate);
         const pacificDateTime = dateObj.toLocaleString('en-US', { timeZone: 'America/Los_Angeles', hour12: true });
 
         return <>{pacificDateTime}</>;
+    };
+
+    const getDateInPacTimeAsString = (newDate) => {
+        const dateObj = new Date(newDate);
+        const pacificDateTime = dateObj.toLocaleString('en-US', { timeZone: 'America/Los_Angeles', hour12: true });
+        return `"${pacificDateTime.toString()}"`.replace(/,/g, ' ');
     };
 
     return (
@@ -510,4 +517,4 @@ const styles = {
     },
 };
 
-export default TicketList3;
+export default AdminPage;
