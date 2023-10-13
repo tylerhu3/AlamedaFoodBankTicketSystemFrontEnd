@@ -1,6 +1,8 @@
 // NextCustomerPage.js
 import React, { useEffect, useRef, useState } from 'react';
 import DvdLogo from './FoodIcon';
+import {Divider, Button } from 'antd';
+
 import 'react-toastify/dist/ReactToastify.css';
 import wavFile from './next.mp3';
 import './nextCustomerPage.css';  // Import the CSS
@@ -171,32 +173,7 @@ const NextCustomerPage = () => {
       });
   };
 
-  const handleTap = (e) => {
-    e.preventDefault();
-    if (currentTicket) {
-      console.log("number tapped pressed")
-      const updatedTicket = { ...currentTicket, done: true };
-      // Update the ticket data on the backend using the PUT request
-      fetch(`http://${window.location.hostname}:8888/tickets/${currentTicket.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Session-Id': sessionId // Include the session ID as a custom header
-        },
-        body: JSON.stringify(updatedTicket),
-      })
-        .then((response) => response.json())
-        .then(() => {
-          setServedCustomers(prevDoneTickets => [...prevDoneTickets, currentTicket]);
-          fetchNextTicket(); // Fetch the next ticket after updating the current one
-          const audio = new Audio(wavFile);
-          audio.play();
-        })
-        .catch((error) => {
-          console.error('Error updating ticket:', error);
-        });
-    }
-  };
+
 
   const isCurrentTimeBetweenXandY = () => {
     // Create a Date object for the current time
@@ -220,6 +197,38 @@ const NextCustomerPage = () => {
       return false
     }
   }
+
+  const handleNumberTap = (e) => {
+    e.preventDefault();
+    if (loading != false)
+      return;
+    if (currentTicket) {
+      setLoading(true);
+      console.log("number tapped pressed")
+      const updatedTicket = { ...currentTicket, done: true };
+      // Update the ticket data on the backend using the PUT request
+      fetch(`http://${window.location.hostname}:8888/tickets/${currentTicket.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Session-Id': sessionId // Include the session ID as a custom header
+        },
+        body: JSON.stringify(updatedTicket),
+      })
+        .then((response) => response.json())
+        .then(() => {
+          setServedCustomers(prevDoneTickets => [...prevDoneTickets, currentTicket]);
+          fetchNextTicket(); // Fetch the next ticket after updating the current one
+          const audio = new Audio(wavFile);
+          audio.play();
+        })
+        .catch((error) => {
+          console.error('Error updating ticket:', error);
+        }).finally(() => {
+          setLoading(false);  // Stop loading after API call completes
+        });
+    }
+  };
 
   useEffect(() => {
     const handleKeyPress = (event) => {
@@ -329,31 +338,78 @@ const NextCustomerPage = () => {
       minute: '2-digit'
     });
 
-    console.log("TYLER::1130 Check 2:", pacificDateTime.toString() )
+    console.log("TYLER::1130 Check 2:", pacificDateTime.toString())
     console.log("TYLER::1130 Check:  ", pacificDateTime.hour, " ", pacificDateTime.minute, " ", pacificDateTime.toString() == "11:30 AM")
 
 
     return pacificDateTime.toString() == "11:30 AM"
   };
 
+  const showAdditionalNotes = (additionalNotes) => {
+    if (additionalNotes == null || additionalNotes == ""){
+      return <></>
+    }
+
+    return <div>
+      <p style={{fontSize: "10px"}}>
+        <div >
+        Additional Notes:
+        </div>
+      {additionalNotes}
+        </p>
+       </div>
+  }
+
+
+  const showAdditionalNotesBigger = (additionalNotes) => {
+    if (additionalNotes == null || additionalNotes == ""){
+      return <></>
+    }
+
+    return <div>
+      <p style={{fontSize: "13px"}}>
+        <div >
+        Additional Notes:
+        </div>
+      {additionalNotes}
+        </p>
+      
+       </div>
+  }
+
   return (
 
     <div>
       {/* Floating Div */}
       <div style={styles.floatingDivLeft}>
-        
+
         <h5>Unserved Clients:</h5>
-      <div style={styles.scrollableContainer}>
+        <div style={styles.scrollableContainer}>
           {waitingCustomers.map((customer, index) => (
-            <div key={index}>{customer.positionInLine} {customer.firstName} {customer.lastName.charAt(0)} {customer.scheduleAppointmentTime != null ? getDateInPacTime(customer.scheduleAppointmentTime) : ""}</div>
+            <div key={index}>
+              {customer.positionInLine} {customer.firstName} {customer.lastName.charAt(0)} {customer.scheduleAppointmentTime != null ? getDateInPacTime(customer.scheduleAppointmentTime) : ""}
+              {showAdditionalNotes(customer.additionalNotes)}
+              
+            <Divider
+              style={{
+                marginTop:'4px',
+                'backgroundColor':'black'}}
+            ></Divider>
+            </div>
           ))}
         </div>
       </div>
       <div style={styles.floatingDivRight}>
-<h5>Served Clients:</h5>
+        <h5>Served Clients:</h5>
         <div style={styles.scrollableContainer}>
           {servedCustomers.map((customer, index) => (
-            <div key={index}>{customer.positionInLine} {customer.firstName} {customer.lastName.charAt(0)} {customer.scheduleAppointmentTime != null ? getDateInPacTime(customer.scheduleAppointmentTime) : ""}</div>
+            <div key={index}>
+               {customer.positionInLine} {customer.firstName} {customer.lastName.charAt(0)} {customer.scheduleAppointmentTime != null ? getDateInPacTime(customer.scheduleAppointmentTime) : ""}
+              {showAdditionalNotes(customer.additionalNotes)}
+            <Divider
+              style={{'backgroundColor':'black'}}
+            ></Divider>
+              </div>
           ))}
         </div>
 
@@ -363,10 +419,43 @@ const NextCustomerPage = () => {
       </div>
       <div style={styles.container}>
         {console.log("Serving Customers!")}
-        <h2 style={styles.servingText}>Serving Client Number</h2>
-        <h1 onClick={handleTap} style={styles.customerNumber}>{(currentTicket != null && currentTicket.positionInLine != null) ? currentTicket.positionInLine : "☺️"}</h1>
+        <div style={styles.buttonTextContainer}>
+          <Button
+            onClick={() => { undoTicketChange() }}
+            style={{
+              margin:'10px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              padding:'20px',
+              fontSize: '20px',
+              backgroundColor: 'red',
+              color: 'white',
+            }}
+          >Previous</Button>
+          <h2 style={styles.servingText}>Serving Client Number</h2>
+
+          <Button
+            onClick={handleNumberTap}
+            style={{
+              margin:'10px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              padding:'20px',
+              fontSize: '20px',
+              backgroundColor: 'green',
+              color: 'white',
+            }}
+          >Next</Button>
+        </div>
+        <h1 onClick={handleNumberTap} style={styles.customerNumber}>{(currentTicket != null && currentTicket.positionInLine != null) ? currentTicket.positionInLine : "☺️"}</h1>
         {currentTicket && currentTicket.firstName != null && (
+          <div>
+
+
+          
           <h2 style={styles.positionInLine}>You are up: {currentTicket.firstName} {currentTicket.lastName.charAt(0)}.</h2>
+          {showAdditionalNotesBigger(currentTicket.additionalNotes)}
+          </div>
         )}
       </div>
 
@@ -383,6 +472,11 @@ const styles = {
     alignItems: 'center',
     height: '100vh',
     background: '#f0f0f0', // Light gray background
+  },
+
+  buttonTextContainer: {
+    display: 'flex',
+    alignItems: 'center'
   },
 
   floatingDivRight: {
